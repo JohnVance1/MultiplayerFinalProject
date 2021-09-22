@@ -5,9 +5,11 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     Rigidbody2D _playerRB;
-    private float _speed = 10;
+    private float _speed = 5;
+    private float _verticalVelocity;
+    private float _terminalVelocity = 10;
 
-
+    private const float Gravity = -15;
 
 
     void Start()
@@ -19,24 +21,40 @@ public class Player : MonoBehaviour
     {
         if(Input.GetKey(KeyCode.W))
         {
-            //_playerRB.transform.position += Vector3.up;
-            _playerRB.AddForce(Vector2.up * _speed);
+            this.transform.position += Vector3.up * _speed * Time.deltaTime;
+            //_playerRB.AddForce(Vector2.up * _speed);
 
         }
 
+        if(_playerRB.velocity.y != 0)
+        {
+            Debug.Log("Hello");
+        }
+
+        _verticalVelocity = _playerRB.velocity.y;
+
         if (Input.GetKey(KeyCode.A))
         {
-            //_playerRB.transform.position += Vector3.left;
-            _playerRB.AddForce(Vector2.left * _speed);
+            this.transform.position += Vector3.left * _speed * Time.deltaTime;
+            //_playerRB.AddForce(Vector2.left * _speed);
 
         }
 
         if (Input.GetKey(KeyCode.D))
         {
-            //_playerRB.transform.position += Vector3.right;
-            _playerRB.AddForce(Vector2.right * _speed);
+            this.transform.position += Vector3.right * _speed * Time.deltaTime;
+            //_playerRB.AddForce(Vector2.right * _speed);
 
         }
+
+        if(_verticalVelocity > _terminalVelocity)
+        {
+            _verticalVelocity += Gravity * Time.deltaTime;
+            this.transform.position += new Vector3(0.0f, _verticalVelocity, 0.0f) * _speed * Time.deltaTime;
+            
+
+        }
+
 
 
     }
