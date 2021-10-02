@@ -21,12 +21,17 @@ public class Player : MonoBehaviour
     private GameObject target;
     private Target targetScript;
 
+    [SerializeField]
+    private GameObject spawn;
+    private Vector3 spawnPoint;
+
 
     void Start()
     {
         _playerRB = GetComponent<Rigidbody2D>();
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
         targetScript = target.GetComponent<Target>();
+        spawnPoint = spawn.transform.position;
     }
 
     void Update()
@@ -74,7 +79,6 @@ public class Player : MonoBehaviour
 
         }
 
-
     }
 
     private bool IsGrounded()
@@ -90,6 +94,13 @@ public class Player : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void Dead()
+    {
+        _playerRB.velocity = Vector2.zero;
+        transform.position = spawnPoint;
+
     }
 
 }
