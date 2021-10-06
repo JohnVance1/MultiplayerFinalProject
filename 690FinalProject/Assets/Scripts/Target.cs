@@ -33,13 +33,13 @@ public class Target : MonoBehaviour
 
         }
 
-        if(transform.position == playerMovePos.transform.position)
-        {           
-            transform.parent = player.transform;
+        //if(transform.position == playerMovePos.transform.position)
+        //{           
+        //    transform.parent = player.transform;
 
-            moveToPlayer = false;
+        //    moveToPlayer = false;
 
-        }
+        //}
 
         if(letGo)
         {

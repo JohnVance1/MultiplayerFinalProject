@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     Rigidbody2D _playerRB;
     private float _speedHorizontal = 200;
@@ -30,37 +31,50 @@ public class Player : MonoBehaviour
     {
         _playerRB = GetComponent<Rigidbody2D>();
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
-        targetScript = target.GetComponent<Target>();
-        spawnPoint = spawn.transform.position;
+        if (target != null)
+        {
+            targetScript = target.GetComponent<Target>();
+        }
+
+        if (spawn != null)
+        {
+            spawnPoint = spawn.transform.position;
+        }
     }
 
     void Update()
     {
-        Move();      
-        
-        if(Input.GetMouseButtonDown(0))
+        if (isLocalPlayer)
         {
-            currentWeaponScript.DistanceGrab();
+            Move();
 
-        }
+            if (Input.GetMouseButtonDown(0))
+            {
+                currentWeaponScript.DistanceGrab();
 
-        if (Input.GetMouseButtonUp(0))
-        {
-            targetScript.letGo = true;
-            targetScript.moveToPlayer = false;
+            }
 
+            if (Input.GetMouseButtonUp(0))
+            {
+                targetScript.letGo = true;
+                targetScript.moveToPlayer = false;
+
+            }
         }
 
     }
 
     private void FixedUpdate()
     {
-        _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
+        if (isLocalPlayer)
+        {
+            _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
 
-        if (Input.GetKey(KeyCode.W) && IsGrounded())
-        {            
-            _playerRB.velocity = Vector2.up * _speedVertical;
+            if (Input.GetKey(KeyCode.W) && IsGrounded())
+            {
+                _playerRB.velocity = Vector2.up * _speedVertical;
 
+            }
         }
     }
 
