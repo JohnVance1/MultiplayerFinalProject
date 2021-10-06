@@ -29,10 +29,12 @@ public class Player_Single : MonoBehaviour
     private int dir;
     private bool shooting;
 
+    public bool grabbing;
 
     void Start()
     {
         dir = 1;
+        grabbing = false;
         _playerRB = GetComponent<Rigidbody2D>();
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
         if (target != null)
@@ -50,23 +52,39 @@ public class Player_Single : MonoBehaviour
     {
         Move();
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && (targetScript.moveToPlayer == false) && grabbing == false)
         {
             currentWeaponScript.DistanceGrab(dir);
             shooting = true;
+            currentWeaponScript.retract = false;
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && grabbing == true)
+        {
+            targetScript.letGo = true;
+            shooting = false;
+            grabbing = false;
+
+        }
+
+        if (Input.GetMouseButtonUp(0) && grabbing == false)
         {
             targetScript.letGo = true;
             targetScript.moveToPlayer = false;
             shooting = false;
-
+            currentWeaponScript.retract = true;
         }
 
-        if (currentWeaponScript.scale.x > 0.01 && shooting == false)
+        if ((currentWeaponScript.scale.x > 0.01 && shooting == false) || currentWeaponScript.retract == true)
         {
             currentWeaponScript.DistanceRetract(dir);
+        }
+        else
+        {
+            currentWeaponScript.retract = false;
+            shooting = false;
+            grabbing = false;
+
         }
     }
 

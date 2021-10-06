@@ -21,7 +21,7 @@ public class Target_Single : MonoBehaviour
 
     void Update()
     {
-        if(moveToPlayer)
+        if(moveToPlayer == true)
         {
             MoveTo(playerMovePos.transform.position);
             GetComponent<BoxCollider2D>().enabled = false;
@@ -33,11 +33,12 @@ public class Target_Single : MonoBehaviour
 
         }
 
-        if (transform.position == playerMovePos.transform.position)
+        if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
         {
             transform.parent = player.transform;
 
             moveToPlayer = false;
+            player.GetComponent<Player_Single>().grabbing = true;
 
         }
 
@@ -45,6 +46,8 @@ public class Target_Single : MonoBehaviour
         {
             GetComponent<BoxCollider2D>().enabled = true;
             transform.parent = null;
+            moveToPlayer = false;
+
         }
 
 

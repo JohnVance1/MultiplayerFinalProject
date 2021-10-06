@@ -11,11 +11,14 @@ public class WeaponScript : MonoBehaviour
     private GameObject shootLine;
     public Vector3 scale;
 
+    public bool retract;
+
     void Start()
     {
         letGo = false;
         scale = shootLine.transform.localScale;
         speed = 10;
+        retract = false;
     }
 
     void Update()
@@ -23,9 +26,10 @@ public class WeaponScript : MonoBehaviour
         scale = shootLine.transform.localScale;
         if(shootLine.transform.localScale.x < 0.01)
         {
+            shootLine.transform.localScale = new Vector3(0.01f, 0.08f, 1);
+            
             shootLine.SetActive(false);
 
-            shootLine.transform.localScale = new Vector3(0.01f, 0.08f, 1);
 
         }
 
@@ -64,15 +68,30 @@ public class WeaponScript : MonoBehaviour
 
     public void DistanceRetract(int dir)
     {
-        shootLine.transform.localScale -= new Vector3((Time.deltaTime * speed), 0, 0);
+        if (shootLine.transform.localScale.x > 0.01)
+        {
+            shootLine.transform.localScale -= new Vector3((Time.deltaTime * speed), 0, 0);
+        }
+
+        else
+        {
+            shootLine.transform.localScale = new Vector3(0.01f, scale.y, scale.z);
+
+        }
 
 
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.GetComponent<Target_Single>())
+        if (collision.gameObject.GetComponent<Target_Single>())
+        {
             collision.gameObject.GetComponent<Target_Single>().moveToPlayer = true;
+            retract = true;
+        }
+
+
     }
+
 
 }
