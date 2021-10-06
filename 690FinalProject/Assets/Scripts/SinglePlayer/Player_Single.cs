@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class Player : NetworkBehaviour
+public class Player_Single : MonoBehaviour
 {
     Rigidbody2D _playerRB;
     private float _speedHorizontal = 200;
@@ -20,14 +20,14 @@ public class Player : NetworkBehaviour
 
     [SerializeField]
     private GameObject target;
-    private Target targetScript;
+    private Target_Single targetScript;
 
     [SerializeField]
     private GameObject spawn;
     private Vector3 spawnPoint;
 
     private int dir;
-
+    private bool shooting;
 
 
     void Start()
@@ -37,7 +37,7 @@ public class Player : NetworkBehaviour
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
         if (target != null)
         {
-            targetScript = target.GetComponent<Target>();
+            targetScript = target.GetComponent<Target_Single>();
         }
 
         if (spawn != null)
@@ -48,38 +48,38 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (isLocalPlayer)
+        Move();
+
+        if (Input.GetMouseButton(0))
         {
-            Move();
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                currentWeaponScript.DistanceGrab(dir);
-
-            }
-
-            if (Input.GetMouseButtonUp(0))
-            {
-                targetScript.letGo = true;
-                targetScript.moveToPlayer = false;
-
-            }
+            currentWeaponScript.DistanceGrab(dir);
+            shooting = true;
         }
 
+        if (Input.GetMouseButtonUp(0))
+        {
+            targetScript.letGo = true;
+            targetScript.moveToPlayer = false;
+            shooting = false;
+
+        }
+
+        if (currentWeaponScript.scale.x > 0.01 && shooting == false)
+        {
+            currentWeaponScript.DistanceRetract(dir);
+        }
     }
 
     private void FixedUpdate()
     {
-        if (isLocalPlayer)
+        _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
+
+        if (Input.GetKey(KeyCode.W) && IsGrounded())
         {
-            _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
+            _playerRB.velocity = Vector2.up * _speedVertical;
 
-            if (Input.GetKey(KeyCode.W) && IsGrounded())
-            {
-                _playerRB.velocity = Vector2.up * _speedVertical;
-
-            }
         }
+       
     }
 
     public void Move()
