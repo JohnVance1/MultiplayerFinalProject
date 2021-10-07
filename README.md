@@ -7,7 +7,7 @@ My semester long project for IGME 690 in Fall 2021
 
 Currently I have finished up what I set out to do for this milestone and I have started working on tasks for the second milestone.
 
-To run this milestone simply load up Unity and open up the SinglePlayer scene to test out the first milestone's functionallity.
+To run this milestone just load up Unity and open up the SinglePlayer scene to test out the first milestone's functionallity.
 
 Controls:
  - W - To jump
