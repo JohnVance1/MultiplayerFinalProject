@@ -27,7 +27,9 @@ public class Player : NetworkBehaviour
     private Vector3 spawnPoint;
 
     private int dir;
+    private bool shooting;
 
+    public bool grabbing;
 
 
     void Start()
@@ -52,16 +54,38 @@ public class Player : NetworkBehaviour
         {
             Move();
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButton(0) && (targetScript.moveToPlayer == false) && grabbing == false)
             {
                 currentWeaponScript.DistanceGrab(dir);
+                shooting = true;
+                currentWeaponScript.retract = false;
+            }
+
+            if (Input.GetMouseButtonUp(0) && grabbing == true)
+            {
+                targetScript.letGo = true;
+                shooting = false;
+                grabbing = false;
 
             }
 
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonUp(0) && grabbing == false)
             {
                 targetScript.letGo = true;
                 targetScript.moveToPlayer = false;
+                shooting = false;
+                currentWeaponScript.retract = true;
+            }
+
+            if ((currentWeaponScript.scale.x > 0.01 && shooting == false) || currentWeaponScript.retract == true)
+            {
+                currentWeaponScript.DistanceRetract(dir);
+            }
+            else
+            {
+                currentWeaponScript.retract = false;
+                shooting = false;
+                grabbing = false;
 
             }
         }

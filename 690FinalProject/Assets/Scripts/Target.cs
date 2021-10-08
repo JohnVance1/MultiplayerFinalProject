@@ -21,30 +21,37 @@ public class Target : MonoBehaviour
 
     void Update()
     {
-        if(moveToPlayer)
+        if (moveToPlayer == true)
         {
             MoveTo(playerMovePos.transform.position);
             GetComponent<BoxCollider2D>().enabled = false;
             letGo = false;
         }
+        else if (player.GetComponent<Player_Single>().grabbing == true)
+        {
+            GetComponent<BoxCollider2D>().enabled = false;
+
+        }
         else
         {
             GetComponent<BoxCollider2D>().enabled = true;
+        }
+
+        if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
+        {
+            transform.parent = player.transform;
+
+            moveToPlayer = false;
+            player.GetComponent<Player_Single>().grabbing = true;
 
         }
 
-        //if(transform.position == playerMovePos.transform.position)
-        //{           
-        //    transform.parent = player.transform;
-
-        //    moveToPlayer = false;
-
-        //}
-
-        if(letGo)
+        if (letGo)
         {
             GetComponent<BoxCollider2D>().enabled = true;
             transform.parent = null;
+            moveToPlayer = false;
+
         }
 
 

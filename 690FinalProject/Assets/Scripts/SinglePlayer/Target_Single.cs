@@ -27,10 +27,14 @@ public class Target_Single : MonoBehaviour
             GetComponent<BoxCollider2D>().enabled = false;
             letGo = false;
         }
+        else if(player.GetComponent<Player_Single>().grabbing == true)
+        {
+            GetComponent<BoxCollider2D>().enabled = false;
+
+        }
         else
         {
             GetComponent<BoxCollider2D>().enabled = true;
-
         }
 
         if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
