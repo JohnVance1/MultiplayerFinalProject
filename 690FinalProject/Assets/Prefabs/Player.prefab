@@ -288,6 +288,7 @@ MonoBehaviour:
   currentWeapon: {fileID: 99464017699525006}
   target: {fileID: 5624194052235422072, guid: d1da8c2ac9e24184881552df0c339ce5, type: 3}
   spawn: {fileID: 0}
+  grabbing: 0
 --- !u!114 &3324528057646403256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,7 +324,7 @@ MonoBehaviour:
   sendInterval: 0.05
   syncPosition: 1
   syncRotation: 1
-  syncScale: 0
+  syncScale: 1
   interpolatePosition: 1
   interpolateRotation: 1
   interpolateScale: 0
