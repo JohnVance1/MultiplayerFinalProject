@@ -18,9 +18,7 @@ public class Player : NetworkBehaviour
     private GameObject currentWeapon;
     private WeaponScript currentWeaponScript;
 
-    [SerializeField]
-    private GameObject target;
-    private Target targetScript;
+    
 
     [SerializeField]
     private GameObject spawn;
@@ -31,16 +29,26 @@ public class Player : NetworkBehaviour
 
     public bool grabbing;
 
+    // Target code
+    public bool moveToPlayer;
+    public bool letGo;
+
+    [SerializeField]
+    private GameObject playerMovePos;
+
+    [SerializeField]
+    private GameObject player;
+
 
     void Start()
     {
         dir = 1;
         _playerRB = GetComponent<Rigidbody2D>();
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
-        if (target != null)
-        {
-            targetScript = target.GetComponent<Target>();
-        }
+        letGo = false;
+        playerMovePos = transform.GetChild(1).gameObject;
+
+      
 
         if (spawn != null)
         {
@@ -52,9 +60,7 @@ public class Player : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            Move();
-
-            if (Input.GetMouseButton(0) && (targetScript.moveToPlayer == false) && grabbing == false)
+            if (Input.GetMouseButton(0) && (moveToPlayer == false) && grabbing == false)
             {
                 currentWeaponScript.DistanceGrab(dir);
                 shooting = true;
@@ -63,7 +69,7 @@ public class Player : NetworkBehaviour
 
             if (Input.GetMouseButtonUp(0) && grabbing == true)
             {
-                targetScript.letGo = true;
+                letGo = true;
                 shooting = false;
                 grabbing = false;
 
@@ -71,8 +77,8 @@ public class Player : NetworkBehaviour
 
             if (Input.GetMouseButtonUp(0) && grabbing == false)
             {
-                targetScript.letGo = true;
-                targetScript.moveToPlayer = false;
+                letGo = true;
+                moveToPlayer = false;
                 shooting = false;
                 currentWeaponScript.retract = true;
             }
@@ -86,6 +92,40 @@ public class Player : NetworkBehaviour
                 currentWeaponScript.retract = false;
                 shooting = false;
                 grabbing = false;
+
+            }
+
+            if (moveToPlayer == true)
+            {
+                MoveTo(playerMovePos.transform.position);
+                GetComponent<BoxCollider2D>().enabled = false;
+                letGo = false;
+            }
+            else if (GetComponent<Player>().grabbing == true)
+            {
+                GetComponent<BoxCollider2D>().enabled = false;
+
+            }
+            else
+            {
+                GetComponent<BoxCollider2D>().enabled = true;
+                Move();
+            }
+
+            if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
+            {
+                transform.parent = transform;
+
+                moveToPlayer = false;
+                GetComponent<Player>().grabbing = true;
+
+            }
+
+            if (letGo)
+            {
+                GetComponent<BoxCollider2D>().enabled = true;
+                transform.parent = null;
+                moveToPlayer = false;
 
             }
         }
@@ -142,6 +182,13 @@ public class Player : NetworkBehaviour
     {
         _playerRB.velocity = Vector2.zero;
         transform.position = spawnPoint;
+
+    }
+
+    public void MoveTo(Vector3 weaponPos)
+    {
+        float step = 10 * Time.deltaTime;
+        transform.position = Vector3.MoveTowards(transform.position, weaponPos, step);
 
     }
 

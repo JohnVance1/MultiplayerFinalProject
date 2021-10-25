@@ -27,7 +27,7 @@ public class Target : MonoBehaviour
             GetComponent<BoxCollider2D>().enabled = false;
             letGo = false;
         }
-        else if (player.GetComponent<Player_Single>().grabbing == true)
+        else if (player.GetComponent<Player>().grabbing == true)
         {
             GetComponent<BoxCollider2D>().enabled = false;
 
@@ -42,7 +42,7 @@ public class Target : MonoBehaviour
             transform.parent = player.transform;
 
             moveToPlayer = false;
-            player.GetComponent<Player_Single>().grabbing = true;
+            player.GetComponent<Player>().grabbing = true;
 
         }
 

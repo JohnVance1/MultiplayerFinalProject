@@ -84,9 +84,9 @@ public class WeaponScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.GetComponent<Target_Single>())
+        if (collision.gameObject.GetComponent<Player>())
         {
-            collision.gameObject.GetComponent<Target_Single>().moveToPlayer = true;
+            collision.gameObject.GetComponent<Player>().moveToPlayer = true;
             retract = true;
         }
 

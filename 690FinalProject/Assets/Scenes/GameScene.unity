@@ -416,7 +416,7 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 1
   spawnPrefabs:
-  - {fileID: 5624194052235422072, guid: d1da8c2ac9e24184881552df0c339ce5, type: 3}
+  - {fileID: 0}
   playerLeftSpawn: {fileID: 1090380065}
   playerRightSpawn: {fileID: 1802563877}
 --- !u!4 &1035172197
