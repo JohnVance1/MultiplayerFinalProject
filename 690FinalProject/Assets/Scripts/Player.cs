@@ -45,13 +45,17 @@ public class Player : NetworkBehaviour
         base.OnStartServer();
 
         //_playerRB.simulated = true;
-        gameObject.name = playerName;
 
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
+        gameObject.name = playerName;
+
+        NetworkIdentity ni = NetworkClient.connection.identity;
+        otherPlayer = ni.GetComponent<Player>();
+        Debug.Log("Spawned Player: " + otherPlayer);
 
     }
 
@@ -64,8 +68,7 @@ public class Player : NetworkBehaviour
         playerMovePos = transform.GetChild(2).gameObject;
         moveToPlayer = false;
 
-        NetworkIdentity ni = NetworkClient.connection.identity;
-        otherPlayer = ni.GetComponent<Player>();
+        
 
         if (spawn != null)
         {
@@ -125,13 +128,7 @@ public class Player : NetworkBehaviour
 
         //}
 
-        if (moveToPlayer == true)
-        {
-            //MoveTo(playerMovePos.transform.position);
-            //GetComponent<BoxCollider2D>().enabled = false;
-            //letGo = false;
-            Debug.Log("Moving");
-        }
+        
         //else if (grabbing == true)
         //{
         //    GetComponent<BoxCollider2D>().enabled = false;
@@ -169,17 +166,34 @@ public class Player : NetworkBehaviour
         currentWeaponScript.DistanceRetract(dir);
         letGo = true;
         shooting = false;
+        Retract();
+    }
+
+    [ClientRpc]
+    public void Retract()
+    {
         if (grabbing)
         {
             //NetworkIdentity ni = NetworkClient.connection.identity;
             //Player other = ni.GetComponent<Player>();
             moveToPlayer = true;
-            Debug.Log("Other Player: " + otherPlayer.moveToPlayer + " || Current Player: " + moveToPlayer);
-            Debug.Log("Other Player: " + otherPlayer.gameObject + " || Current Player: " + gameObject);
+            if (otherPlayer != null)
+            {
+                Debug.Log("Other Player: " + otherPlayer.moveToPlayer + " || Current Player: " + moveToPlayer);
+                Debug.Log("Other Player: " + otherPlayer.gameObject + " || Current Player: " + gameObject);
+            }
         }
 
+        if (moveToPlayer == true)
+        {
+            //MoveTo(playerMovePos.transform.position);
+            //GetComponent<BoxCollider2D>().enabled = false;
+            //letGo = false;
+            Debug.Log("Moving");
+        }
     }
 
+    
     private void FixedUpdate()
     {
         if (!isLocalPlayer)
@@ -250,17 +264,25 @@ public class Player : NetworkBehaviour
 
     }
 
-    [ServerCallback]
+    [ServerCallback] 
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.transform.GetComponent<WeaponScript>())
         {
             //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
             //col.GetComponent<WeaponScript>().retract = true;
-            grabbing = true;
-            Debug.Log("HIT");
-
+            Grabbing();
         }
+    }
+
+   
+
+    [ClientRpc]
+    public void Grabbing()
+    {        
+        grabbing = true;
+        
+        Debug.Log("HIT");
     }
 
     

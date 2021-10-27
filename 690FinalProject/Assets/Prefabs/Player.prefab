@@ -314,12 +314,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   currentWeapon: {fileID: 99464017699525006}
+  playerName: 
   spawn: {fileID: 0}
   grabbing: 0
   moveToPlayer: 0
   letGo: 0
   playerMovePos: {fileID: 0}
-  player: {fileID: 0}
 --- !u!114 &3324528057646403256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -381,7 +381,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   target: {fileID: 99464018691673426}
-  clientAuthority: 0
+  clientAuthority: 1
   syncVelocity: 1
   clearVelocity: 0
   velocitySensitivity: 0.1
