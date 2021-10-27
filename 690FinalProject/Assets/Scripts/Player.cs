@@ -18,7 +18,8 @@ public class Player : NetworkBehaviour
     private GameObject currentWeapon;
     private WeaponScript currentWeaponScript;
 
-    
+    [SyncVar]
+    public string playerName;
 
     [SerializeField]
     private GameObject spawn;
@@ -37,14 +38,20 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private GameObject playerMovePos;
 
-    [SerializeField]
-    private GameObject player;
+    private Player otherPlayer;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
 
-        _playerRB.simulated = true;
+        //_playerRB.simulated = true;
+        gameObject.name = playerName;
+
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
 
     }
 
@@ -55,8 +62,10 @@ public class Player : NetworkBehaviour
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
         letGo = false;
         playerMovePos = transform.GetChild(2).gameObject;
+        moveToPlayer = false;
 
-      
+        NetworkIdentity ni = NetworkClient.connection.identity;
+        otherPlayer = ni.GetComponent<Player>();
 
         if (spawn != null)
         {
@@ -80,10 +89,9 @@ public class Player : NetworkBehaviour
 
         if (Input.GetMouseButtonUp(0))// && grabbing == true)
         {
-            currentWeaponScript.DistanceRetract(dir);
-            letGo = true;
-            shooting = false;
-            grabbing = false;
+            Grab();
+
+            //grabbing = false;
 
         }
 
@@ -119,39 +127,57 @@ public class Player : NetworkBehaviour
 
         if (moveToPlayer == true)
         {
-            MoveTo(playerMovePos.transform.position);
-            GetComponent<BoxCollider2D>().enabled = false;
-            letGo = false;
+            //MoveTo(playerMovePos.transform.position);
+            //GetComponent<BoxCollider2D>().enabled = false;
+            //letGo = false;
+            Debug.Log("Moving");
         }
-        else if (grabbing == true)
-        {
-            GetComponent<BoxCollider2D>().enabled = false;
+        //else if (grabbing == true)
+        //{
+        //    GetComponent<BoxCollider2D>().enabled = false;
 
-        }
-        else
-        {
-            GetComponent<BoxCollider2D>().enabled = true;
-            Move();
-        }
+        //}
+        //else
+        //{
+        //    GetComponent<BoxCollider2D>().enabled = true;
+        //    Move();
+        //}
 
-        if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
-        {
-            transform.parent = transform;
+        //if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
+        //{
+        //    transform.parent = transform;
 
-            moveToPlayer = false;
-            grabbing = true;
+        //    moveToPlayer = false;
+        //    grabbing = true;
 
-        }
+        //}
 
-        if (letGo)
-        {
-            GetComponent<BoxCollider2D>().enabled = true;
-            transform.parent = null;
-            moveToPlayer = false;
+        //if (letGo)
+        //{
+        //    GetComponent<BoxCollider2D>().enabled = true;
+        //    transform.parent = null;
+        //    moveToPlayer = false;
 
-        }
+        //}
 
         #endregion
+    }
+
+    [Command]
+    public void Grab()
+    {
+        currentWeaponScript.DistanceRetract(dir);
+        letGo = true;
+        shooting = false;
+        if (grabbing)
+        {
+            //NetworkIdentity ni = NetworkClient.connection.identity;
+            //Player other = ni.GetComponent<Player>();
+            moveToPlayer = true;
+            Debug.Log("Other Player: " + otherPlayer.moveToPlayer + " || Current Player: " + moveToPlayer);
+            Debug.Log("Other Player: " + otherPlayer.gameObject + " || Current Player: " + gameObject);
+        }
+
     }
 
     private void FixedUpdate()
@@ -229,8 +255,9 @@ public class Player : NetworkBehaviour
     {
         if (col.transform.GetComponent<WeaponScript>())
         {
-            col.transform.parent.GetComponent<Player>().moveToPlayer = true;
-            col.GetComponent<WeaponScript>().retract = true;
+            //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
+            //col.GetComponent<WeaponScript>().retract = true;
+            grabbing = true;
             Debug.Log("HIT");
 
         }

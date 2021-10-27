@@ -173,8 +173,6 @@ GameObject:
   - component: {fileID: 7939915930381876936}
   - component: {fileID: 2328451953004967850}
   - component: {fileID: 8667979543947338687}
-  - component: {fileID: 8872101796804459825}
-  - component: {fileID: -3177179338393900753}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -420,41 +418,6 @@ MonoBehaviour:
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   target: {fileID: 99464017699525001}
---- !u!114 &8872101796804459825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99464018691673427}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eca0c89aa72870f45be648fcaf5c8f01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  Control: {x: 0, y: 0, z: 0}
-  c: {r: 0, g: 0, b: 0, a: 0}
---- !u!114 &-3177179338393900753
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99464018691673427}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cffb79a0219ddab46bfada1e1edb4c32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  rb: {fileID: 99464018691673426}
-  Velocity: {x: 0, y: 0, z: 0}
-  Rotation: 0
-  Position: {x: 0, y: 0, z: 0}
-  AngularVelocity: 0
 --- !u!1 &4975982399523543788
 GameObject:
   m_ObjectHideFlags: 0

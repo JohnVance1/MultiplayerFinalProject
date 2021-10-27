@@ -11,12 +11,14 @@ namespace Mirror
         public Transform playerLeftSpawn;
         public Transform playerRightSpawn;
         GameObject target;
+        private int i = 0;
 
         public override void OnServerAddPlayer(NetworkConnection conn)
         {
             // add player at correct spawn position
             Transform start = numPlayers == 0 ? playerLeftSpawn : playerRightSpawn;
             GameObject player = Instantiate(playerPrefab, start.position, start.rotation);
+            player.GetComponent<Player>().playerName = "Player " + i++;
             NetworkServer.AddPlayerForConnection(conn, player);
 
             // spawn target if two players
