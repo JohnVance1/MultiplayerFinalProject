@@ -5,7 +5,7 @@ using Mirror;
 
 public class Player : NetworkBehaviour
 {
-    Rigidbody2D _playerRB;
+    public Rigidbody2D _playerRB;
     private float _speedHorizontal = 200;
     private float _speedVertical = 20;
 
@@ -29,6 +29,7 @@ public class Player : NetworkBehaviour
 
     public bool grabbing;
 
+
     // Target code
     public bool moveToPlayer;
     public bool letGo;
@@ -39,6 +40,13 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private GameObject player;
 
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        _playerRB.simulated = true;
+
+    }
 
     void Start()
     {
@@ -46,7 +54,7 @@ public class Player : NetworkBehaviour
         _playerRB = GetComponent<Rigidbody2D>();
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
         letGo = false;
-        playerMovePos = transform.GetChild(1).gameObject;
+        playerMovePos = transform.GetChild(2).gameObject;
 
       
 
@@ -58,95 +66,106 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (isLocalPlayer)
+        if (!isLocalPlayer)
         {
-            if (Input.GetMouseButton(0) && (moveToPlayer == false) && grabbing == false)
-            {
-                currentWeaponScript.DistanceGrab(dir);
-                shooting = true;
-                currentWeaponScript.retract = false;
-            }
-
-            if (Input.GetMouseButtonUp(0) && grabbing == true)
-            {
-                letGo = true;
-                shooting = false;
-                grabbing = false;
-
-            }
-
-            if (Input.GetMouseButtonUp(0) && grabbing == false)
-            {
-                letGo = true;
-                moveToPlayer = false;
-                shooting = false;
-                currentWeaponScript.retract = true;
-            }
-
-            if ((currentWeaponScript.scale.x > 0.01 && shooting == false) || currentWeaponScript.retract == true)
-            {
-                currentWeaponScript.DistanceRetract(dir);
-            }
-            else
-            {
-                currentWeaponScript.retract = false;
-                shooting = false;
-                grabbing = false;
-
-            }
-
-            if (moveToPlayer == true)
-            {
-                MoveTo(playerMovePos.transform.position);
-                GetComponent<BoxCollider2D>().enabled = false;
-                letGo = false;
-            }
-            else if (GetComponent<Player>().grabbing == true)
-            {
-                GetComponent<BoxCollider2D>().enabled = false;
-
-            }
-            else
-            {
-                GetComponent<BoxCollider2D>().enabled = true;
-                Move();
-            }
-
-            if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
-            {
-                transform.parent = transform;
-
-                moveToPlayer = false;
-                GetComponent<Player>().grabbing = true;
-
-            }
-
-            if (letGo)
-            {
-                GetComponent<BoxCollider2D>().enabled = true;
-                transform.parent = null;
-                moveToPlayer = false;
-
-            }
+            return;
         }
 
+        if (Input.GetMouseButton(0))//&& (moveToPlayer == false) && grabbing == false)
+        {
+            currentWeaponScript.DistanceGrab(dir);
+            shooting = true;
+            currentWeaponScript.retract = false;
+        }
+
+        if (Input.GetMouseButtonUp(0))// && grabbing == true)
+        {
+            currentWeaponScript.DistanceRetract(dir);
+            letGo = true;
+            shooting = false;
+            grabbing = false;
+
+        }
+
+        if (letGo && currentWeaponScript.transform.localPosition.x > 0.73)
+        {
+            currentWeaponScript.DistanceRetract(dir);
+
+        }
+
+        Flip();
+
+
+        #region Rest of grab code
+        //if (Input.GetMouseButtonUp(0) && grabbing == false)
+        //{
+        //    letGo = true;
+        //    moveToPlayer = false;
+        //    shooting = false;
+        //    currentWeaponScript.retract = true;
+        //}
+
+        //if ((currentWeaponScript.transform.localPosition.x > 0.7 && shooting == false) || currentWeaponScript.retract == true)
+        //{
+        //    currentWeaponScript.DistanceRetract(dir);
+        //}
+        //else
+        //{
+        //    currentWeaponScript.retract = false;
+        //    shooting = false;
+        //    grabbing = false;
+
+        //}
+
+        if (moveToPlayer == true)
+        {
+            MoveTo(playerMovePos.transform.position);
+            GetComponent<BoxCollider2D>().enabled = false;
+            letGo = false;
+        }
+        else if (grabbing == true)
+        {
+            GetComponent<BoxCollider2D>().enabled = false;
+
+        }
+        else
+        {
+            GetComponent<BoxCollider2D>().enabled = true;
+            Move();
+        }
+
+        if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
+        {
+            transform.parent = transform;
+
+            moveToPlayer = false;
+            grabbing = true;
+
+        }
+
+        if (letGo)
+        {
+            GetComponent<BoxCollider2D>().enabled = true;
+            transform.parent = null;
+            moveToPlayer = false;
+
+        }
+
+        #endregion
     }
 
     private void FixedUpdate()
     {
-        if (isLocalPlayer)
+        if (!isLocalPlayer)
         {
-            _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
-
-            if (Input.GetKey(KeyCode.W) && IsGrounded())
-            {
-                _playerRB.velocity = Vector2.up * _speedVertical;
-
-            }
+            return;
         }
+
+        Move();
+
     }
 
-    public void Move()
+    public void Flip()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
         
@@ -162,6 +181,19 @@ public class Player : NetworkBehaviour
         }
 
     }
+
+    public void Move()
+    {
+        _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
+
+        if (Input.GetKey(KeyCode.W) && IsGrounded())
+        {
+            _playerRB.velocity = Vector2.up * _speedVertical;
+
+        }
+        
+    }
+
 
     private bool IsGrounded()
     {
@@ -191,5 +223,19 @@ public class Player : NetworkBehaviour
         transform.position = Vector3.MoveTowards(transform.position, weaponPos, step);
 
     }
+
+    [ServerCallback]
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.transform.GetComponent<WeaponScript>())
+        {
+            col.transform.parent.GetComponent<Player>().moveToPlayer = true;
+            col.GetComponent<WeaponScript>().retract = true;
+            Debug.Log("HIT");
+
+        }
+    }
+
+    
 
 }

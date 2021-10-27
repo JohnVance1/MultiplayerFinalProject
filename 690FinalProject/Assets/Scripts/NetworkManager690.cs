@@ -22,8 +22,8 @@ namespace Mirror
             // spawn target if two players
             if (numPlayers == 2)
             {
-                target = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Target"));
-                NetworkServer.Spawn(target);
+                //target = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Target"));
+                //NetworkServer.Spawn(target);
             }
         }
 

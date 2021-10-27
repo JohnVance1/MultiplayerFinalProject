@@ -75,10 +75,10 @@ public class Player_Single : MonoBehaviour
             currentWeaponScript.retract = true;
         }
 
-        if ((currentWeaponScript.scale.x > 0.01 && shooting == false) || currentWeaponScript.retract == true)
-        {
-            currentWeaponScript.DistanceRetract(dir);
-        }
+        //if ((currentWeaponScript.scale.x > 0.01 && shooting == false) || currentWeaponScript.retract == true)
+        //{
+        //    currentWeaponScript.DistanceRetract(dir);
+        //}
         else
         {
             currentWeaponScript.retract = false;

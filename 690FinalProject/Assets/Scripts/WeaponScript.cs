@@ -1,48 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class WeaponScript : MonoBehaviour
 {
     public bool letGo;
     public float speed;
 
-    [SerializeField]
-    private GameObject shootLine;
-    public Vector3 scale;
+
+    public Vector3 startPos;
 
     public bool retract;
 
     void Start()
     {
         letGo = false;
-        scale = shootLine.transform.localScale;
         speed = 10;
         retract = false;
+        startPos = transform.localPosition;
+
     }
 
     void Update()
     {
-        scale = shootLine.transform.localScale;
-        if(shootLine.transform.localScale.x < 0.01)
-        {
-            shootLine.transform.localScale = new Vector3(0.01f, 0.08f, 1);
-            
-            shootLine.SetActive(false);
-
-
-        }
+        
 
     }
 
-
     public void DistanceGrab(int dir)   
     {
-        shootLine.SetActive(true);
-
-        if (shootLine.transform.localScale.x <= 4)
+        
+        if (transform.localPosition.x <= 4)
         {
-            shootLine.transform.localScale += new Vector3((Time.deltaTime * speed), 0, 0);
+            transform.position += new Vector3((Time.deltaTime * speed * dir), 0, 0);
         }
 
 
@@ -68,30 +59,25 @@ public class WeaponScript : MonoBehaviour
 
     public void DistanceRetract(int dir)
     {
-        if (shootLine.transform.localScale.x > 0.01)
+        if (transform.localPosition.x > 0.7)
         {
-            shootLine.transform.localScale -= new Vector3((Time.deltaTime * speed), 0, 0);
-        }
-
-        else
-        {
-            shootLine.transform.localScale = new Vector3(0.01f, scale.y, scale.z);
-
-        }
+            transform.position -= new Vector3((Time.deltaTime * speed * dir), 0, 0);
+        }      
 
 
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.GetComponent<Player>())
-        {
-            collision.gameObject.GetComponent<Player>().moveToPlayer = true;
-            retract = true;
-        }
+    //private void OnTriggerEnter2D(Collider2D collision)
+    //{
+    //    if (collision.gameObject.GetComponent<Player>())
+    //    {
+    //        collision.gameObject.GetComponent<Player>().moveToPlayer = true;
+    //        retract = true;
+    //        Debug.Log("HIT");
+    //    }
 
 
-    }
+    //}
 
 
 }
