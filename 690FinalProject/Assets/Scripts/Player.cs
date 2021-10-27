@@ -53,12 +53,13 @@ public class Player : NetworkBehaviour
         base.OnStartClient();
         gameObject.name = playerName;
 
-        NetworkIdentity ni = NetworkClient.connection.identity;
-        otherPlayer = ni.GetComponent<Player>();
-        Debug.Log("Spawned Player: " + otherPlayer);
+        //NetworkIdentity ni = NetworkClient.connection.identity;
+        //otherPlayer = ni.GetComponent<Player>();
+        //Debug.Log("Spawned Player: " + otherPlayer);
 
     }
 
+    //[Client]
     void Start()
     {
         dir = 1;
@@ -76,6 +77,7 @@ public class Player : NetworkBehaviour
         }
     }
 
+    //[Client]
     void Update()
     {
         if (!isLocalPlayer)
@@ -92,7 +94,7 @@ public class Player : NetworkBehaviour
 
         if (Input.GetMouseButtonUp(0))// && grabbing == true)
         {
-            Grab();
+            CmdGrab();
 
             //grabbing = false;
 
@@ -161,17 +163,21 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
-    public void Grab()
+    public void CmdGrab()
+    {
+        
+        Debug.Log(NetworkServer.connections.Count);
+       // if(NetworkServer.connections.Count)
+
+        RpcRetract();
+    }
+
+    [ClientRpc]
+    public void RpcRetract()
     {
         currentWeaponScript.DistanceRetract(dir);
         letGo = true;
         shooting = false;
-        Retract();
-    }
-
-    [ClientRpc]
-    public void Retract()
-    {
         if (grabbing)
         {
             //NetworkIdentity ni = NetworkClient.connection.identity;
@@ -193,7 +199,7 @@ public class Player : NetworkBehaviour
         }
     }
 
-    
+    //[Client]
     private void FixedUpdate()
     {
         if (!isLocalPlayer)
@@ -205,6 +211,7 @@ public class Player : NetworkBehaviour
 
     }
 
+    [Client]
     public void Flip()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -222,6 +229,7 @@ public class Player : NetworkBehaviour
 
     }
 
+    [Client]
     public void Move()
     {
         _playerRB.velocity = new Vector2(horizontalInput * _speedHorizontal * Time.deltaTime, _playerRB.velocity.y);
@@ -234,7 +242,7 @@ public class Player : NetworkBehaviour
         
     }
 
-
+    [Client]
     private bool IsGrounded()
     {
         RaycastHit2D groundCheckLeft = Physics2D.Raycast(new Vector3(transform.position.x - transform.localScale.x / 2, transform.position.y, transform.position.z), Vector2.down, transform.localScale.y/2 + 0.05f, layers);
@@ -250,6 +258,7 @@ public class Player : NetworkBehaviour
         return false;
     }
 
+    [Client]
     public void Dead()
     {
         _playerRB.velocity = Vector2.zero;
@@ -257,6 +266,7 @@ public class Player : NetworkBehaviour
 
     }
 
+    [Client]
     public void MoveTo(Vector3 weaponPos)
     {
         float step = 10 * Time.deltaTime;
@@ -267,18 +277,18 @@ public class Player : NetworkBehaviour
     [ServerCallback] 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.transform.GetComponent<WeaponScript>())
+
+        if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
         {
             //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
             //col.GetComponent<WeaponScript>().retract = true;
-            Grabbing();
+            CmdGrabbing();
         }
     }
 
-   
 
-    [ClientRpc]
-    public void Grabbing()
+    [TargetRpc]
+    public void CmdGrabbing()
     {        
         grabbing = true;
         
