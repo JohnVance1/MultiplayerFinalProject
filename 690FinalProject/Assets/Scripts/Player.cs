@@ -36,26 +36,29 @@ public class Player : NetworkBehaviour
     public bool letGo;
 
     [SerializeField]
-    private GameObject playerMovePos;
+    public GameObject playerMovePos;
+    private GameObject otherMovePos;
 
+    [SerializeField]
     private Player otherPlayer;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
+        gameObject.name = playerName;
 
-        //_playerRB.simulated = true;
+        
 
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
+
         gameObject.name = playerName;
 
-        //NetworkIdentity ni = NetworkClient.connection.identity;
-        //otherPlayer = ni.GetComponent<Player>();
-        //Debug.Log("Spawned Player: " + otherPlayer);
+
+        Debug.Log("Spawned Player: " + otherPlayer);
 
     }
 
@@ -69,7 +72,6 @@ public class Player : NetworkBehaviour
         playerMovePos = transform.GetChild(2).gameObject;
         moveToPlayer = false;
 
-        
 
         if (spawn != null)
         {
@@ -108,6 +110,12 @@ public class Player : NetworkBehaviour
 
         Flip();
 
+        if (grabbing)
+        {
+            moveToPlayer = true;
+            MoveTo(otherMovePos.transform.position);
+        }
+
 
         #region Rest of grab code
         //if (Input.GetMouseButtonUp(0) && grabbing == false)
@@ -130,7 +138,7 @@ public class Player : NetworkBehaviour
 
         //}
 
-        
+
         //else if (grabbing == true)
         //{
         //    GetComponent<BoxCollider2D>().enabled = false;
@@ -162,13 +170,16 @@ public class Player : NetworkBehaviour
         #endregion
     }
 
+    [ClientRpc]
+    public void SetPlayer(Player other)
+    {
+        otherPlayer = other;
+        otherMovePos = otherPlayer.playerMovePos;
+    }
+
     [Command]
     public void CmdGrab()
     {
-        
-        Debug.Log(NetworkServer.connections.Count);
-       // if(NetworkServer.connections.Count)
-
         RpcRetract();
     }
 
@@ -179,15 +190,9 @@ public class Player : NetworkBehaviour
         letGo = true;
         shooting = false;
         if (grabbing)
-        {
-            //NetworkIdentity ni = NetworkClient.connection.identity;
-            //Player other = ni.GetComponent<Player>();
+        {            
             moveToPlayer = true;
-            if (otherPlayer != null)
-            {
-                Debug.Log("Other Player: " + otherPlayer.moveToPlayer + " || Current Player: " + moveToPlayer);
-                Debug.Log("Other Player: " + otherPlayer.gameObject + " || Current Player: " + gameObject);
-            }
+            //MoveTo(otherMovePos.transform.position);
         }
 
         if (moveToPlayer == true)
@@ -277,7 +282,6 @@ public class Player : NetworkBehaviour
     [ServerCallback] 
     void OnTriggerEnter2D(Collider2D col)
     {
-
         if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
         {
             //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
@@ -293,6 +297,10 @@ public class Player : NetworkBehaviour
         grabbing = true;
         
         Debug.Log("HIT");
+
+
+
+
     }
 
     
