@@ -26,9 +26,9 @@ public class Player : NetworkBehaviour
     private Vector3 spawnPoint;
 
     private int dir;
-    private bool shooting;
-
+    private bool notShooting;
     public bool grabbing;
+    public bool grabbed;
 
 
     // Target code
@@ -39,7 +39,7 @@ public class Player : NetworkBehaviour
     public GameObject playerMovePos;
     private GameObject otherMovePos;
 
-    [SerializeField]
+    [SerializeField] [SyncVar]
     private Player otherPlayer;
 
     public override void OnStartServer()
@@ -58,8 +58,6 @@ public class Player : NetworkBehaviour
         gameObject.name = playerName;
 
 
-        Debug.Log("Spawned Player: " + otherPlayer);
-
     }
 
     //[Client]
@@ -71,7 +69,8 @@ public class Player : NetworkBehaviour
         letGo = false;
         playerMovePos = transform.GetChild(2).gameObject;
         moveToPlayer = false;
-
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
+        grabbed = false;
 
         if (spawn != null)
         {
@@ -87,87 +86,96 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        if (Input.GetMouseButton(0))//&& (moveToPlayer == false) && grabbing == false)
+        if (Input.GetMouseButton(0))
         {
-            currentWeaponScript.DistanceGrab(dir);
-            shooting = true;
-            currentWeaponScript.retract = false;
+            if (grabbed == false)
+            {
+                if (grabbing)
+                {
+                    CmdNotShooting();
+                }
+                else
+                {
+                    CmdShoot();
+                }
+            }
+            
         }
 
-        if (Input.GetMouseButtonUp(0))// && grabbing == true)
+        if (Input.GetMouseButtonUp(0) && grabbing == true)
         {
             CmdGrab();
 
-            //grabbing = false;
-
         }
 
-        if (letGo && currentWeaponScript.transform.localPosition.x > 0.73)
+        if (letGo)
         {
-            currentWeaponScript.DistanceRetract(dir);
-
+            CmdLetGo(otherPlayer, this);
         }
+
 
         Flip();
 
-        if (grabbing)
-        {
-            moveToPlayer = true;
-            MoveTo(otherMovePos.transform.position);
-        }
 
 
         #region Rest of grab code
-        //if (Input.GetMouseButtonUp(0) && grabbing == false)
-        //{
-        //    letGo = true;
-        //    moveToPlayer = false;
-        //    shooting = false;
-        //    currentWeaponScript.retract = true;
-        //}
+        
 
-        //if ((currentWeaponScript.transform.localPosition.x > 0.7 && shooting == false) || currentWeaponScript.retract == true)
-        //{
-        //    currentWeaponScript.DistanceRetract(dir);
-        //}
-        //else
-        //{
-        //    currentWeaponScript.retract = false;
-        //    shooting = false;
-        //    grabbing = false;
+        if (grabbing)
+        {
+            //CmdGrab();
+            Debug.Log("letGo: " + letGo);
+            Debug.Log("grabbed");
+            if (otherMovePos.transform.position == transform.position)
+            { 
+                CmdParent(otherPlayer, gameObject);
+                
+            }
+        }
 
-        //}
-
-
-        //else if (grabbing == true)
-        //{
-        //    GetComponent<BoxCollider2D>().enabled = false;
-
-        //}
-        //else
-        //{
-        //    GetComponent<BoxCollider2D>().enabled = true;
-        //    Move();
-        //}
-
-        //if (transform.position == playerMovePos.transform.position && moveToPlayer == true)
-        //{
-        //    transform.parent = transform;
-
-        //    moveToPlayer = false;
-        //    grabbing = true;
-
-        //}
-
-        //if (letGo)
-        //{
-        //    GetComponent<BoxCollider2D>().enabled = true;
-        //    transform.parent = null;
-        //    moveToPlayer = false;
-
-        //}
+        
 
         #endregion
+    }
+
+    [Command]
+    public void CmdLetGo(Player other, Player current)
+    {
+        other.GetComponent<BoxCollider2D>().enabled = true;
+        other.transform.parent = null;
+        other._playerRB.simulated = true;
+        other.moveToPlayer = false;
+        other.grabbed = false;
+        RpcLetGo(other, current);
+    }
+
+    [ClientRpc]
+    public void RpcLetGo(Player other, Player current)
+    {
+        other.GetComponent<BoxCollider2D>().enabled = true;
+        other.transform.parent = null;
+        other._playerRB.simulated = true;
+        other.moveToPlayer = false;
+        other.grabbed = false;
+    }
+
+    [Command]
+    public void CmdParent(Player other, GameObject gO)
+    {
+        gO.transform.parent = other.transform;
+        //gO.GetComponent<Player>().grabbing = false;
+        RpcParent(other, gO);
+
+    }
+
+    [ClientRpc]
+    public void RpcParent(Player other, GameObject gO)
+    {
+        gO.transform.parent = other.transform;
+        //gO.GetComponent<Player>().grabbing = false;
+
+        Debug.Log("Transform Set");
+
     }
 
     [ClientRpc]
@@ -175,11 +183,23 @@ public class Player : NetworkBehaviour
     {
         otherPlayer = other;
         otherMovePos = otherPlayer.playerMovePos;
+        CmdSetPlayer(other);
     }
+
+    [Command(requiresAuthority = false)]
+    public void CmdSetPlayer(Player other)
+    {
+        otherPlayer = other;
+        otherMovePos = otherPlayer.playerMovePos;
+        
+    }
+
 
     [Command]
     public void CmdGrab()
     {
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
+
         RpcRetract();
     }
 
@@ -188,20 +208,38 @@ public class Player : NetworkBehaviour
     {
         currentWeaponScript.DistanceRetract(dir);
         letGo = true;
-        shooting = false;
-        if (grabbing)
-        {            
-            moveToPlayer = true;
-            //MoveTo(otherMovePos.transform.position);
-        }
+        grabbing = false;
+    }
 
-        if (moveToPlayer == true)
-        {
-            //MoveTo(playerMovePos.transform.position);
-            //GetComponent<BoxCollider2D>().enabled = false;
-            //letGo = false;
-            Debug.Log("Moving");
-        }
+    [Command]
+    public void CmdNotShooting()
+    {
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
+
+        RpcNotShooting();
+    }
+
+    [ClientRpc]
+    public void RpcNotShooting()
+    {
+        currentWeaponScript.DistanceRetract(dir);
+
+
+    }
+
+    [Command]
+    public void CmdShoot()
+    {
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = true;
+
+        RpcExtend();
+    }
+
+    [ClientRpc]
+    public void RpcExtend()
+    {
+        currentWeaponScript.DistanceGrab(dir);
+        letGo = false;
     }
 
     //[Client]
@@ -212,9 +250,19 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        Move();
-
+        if (moveToPlayer)
+        {
+            MoveTo(otherMovePos.transform.position);
+            GetComponent<BoxCollider2D>().enabled = false;
+            _playerRB.simulated = false;
+        }
+        else
+        {
+            Move();
+        }
     }
+
+    
 
     [Client]
     public void Flip()
@@ -286,20 +334,33 @@ public class Player : NetworkBehaviour
         {
             //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
             //col.GetComponent<WeaponScript>().retract = true;
-            CmdGrabbing();
+            RpcGrabbing(otherPlayer, this);
+            RpcOffColliders(this);
+
         }
     }
 
+    [ClientRpc]
+    public void RpcOffColliders(Player current)
+    {
+        GetComponent<BoxCollider2D>().enabled = false;
+        _playerRB.simulated = false;
 
-    [TargetRpc]
-    public void CmdGrabbing()
-    {        
-        grabbing = true;
-        
-        Debug.Log("HIT");
+    }
 
 
+    [ClientRpc]
+    public void RpcGrabbing(Player other, Player current)
+    {
+        if (other.grabbing == false)
+        {
+            other.grabbing = true;
+            current.grabbed = true;
+            current.moveToPlayer = true;
+            
+            Debug.Log("HIT");
 
+        }
 
     }
 

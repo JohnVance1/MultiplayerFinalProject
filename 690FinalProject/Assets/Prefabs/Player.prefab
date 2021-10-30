@@ -319,7 +319,8 @@ MonoBehaviour:
   grabbing: 0
   moveToPlayer: 0
   letGo: 0
-  playerMovePos: {fileID: 0}
+  playerMovePos: {fileID: 99464018682348710}
+  otherPlayer: {fileID: 0}
 --- !u!114 &3324528057646403256
 MonoBehaviour:
   m_ObjectHideFlags: 0
