@@ -26,7 +26,7 @@ public class Player : NetworkBehaviour
     private Vector3 spawnPoint;
 
     private int dir;
-    private bool notShooting;
+    public bool notShooting;
     public bool grabbing;
     public bool grabbed;
 
@@ -88,6 +88,7 @@ public class Player : NetworkBehaviour
 
         if (Input.GetMouseButton(0))
         {
+            //notShooting = false;
             if (grabbed == false)
             {
                 if (grabbing)
@@ -102,13 +103,18 @@ public class Player : NetworkBehaviour
             
         }
 
-        if (Input.GetMouseButtonUp(0) && grabbing == true)
+        if (Input.GetMouseButtonUp(0))// && grabbing == true)
         {
             CmdGrab();
+        }
+
+        if(notShooting)
+        {
+            CmdNotShooting();
 
         }
 
-        if (letGo)
+        if (letGo && otherPlayer != null)
         {
             CmdLetGo(otherPlayer, this);
         }
@@ -199,6 +205,7 @@ public class Player : NetworkBehaviour
     public void CmdGrab()
     {
         currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
+        //notShooting = true;
 
         RpcRetract();
     }
@@ -208,7 +215,9 @@ public class Player : NetworkBehaviour
     {
         currentWeaponScript.DistanceRetract(dir);
         letGo = true;
-        grabbing = false;
+        grabbing = false; 
+        notShooting = true;
+
     }
 
     [Command]
@@ -240,6 +249,7 @@ public class Player : NetworkBehaviour
     {
         currentWeaponScript.DistanceGrab(dir);
         letGo = false;
+        notShooting = false;
     }
 
     //[Client]
