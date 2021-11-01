@@ -2,6 +2,23 @@
 My semester long project for IGME 690 in Fall 2021
 
 
+## Milestone 2
+
+This milestone was definitly a lot more difficult than the last milestone however I managed to complete all of my goals for it. 
+
+In terms of what I struggled with a lot of it was learning Mirror's Documentation (https://mirror-networking.gitbook.io/docs/) and how to use it. I eventually figured out how it worked but I am more than sure that some of my code/transfers to and from the server could be more efficient. 
+
+Running this milestone should be similar to the previous way to run it except I have included a package called ParelSync which allows for clones of the Unity Project to exist. You'll want to open up ParelSync and create at least one new clone in the Clones Manager tab so you can have both a host and another client open at the same time. You can then select host on one of the Unity Projects and client on the other in order to play around with both players and interact with each other. 
+
+In terms of controls they are the same as in the last milestone.
+Controls:
+ - W - To jump
+ - A - To move left
+ - D - To move right
+ - Left Mouse Button - Fire weapon
+
+There are some gameplay differences from the first milestone as well. The main one being that instead of an orange beam moving across the screen the weapon(yellow cube) moves accross the screen. Also there is a bit of a delay when the player moves and it is grabbing the other player. 
+
 
 ## Milestone 1
 
