@@ -4,9 +4,11 @@ My semester long project for IGME 690 in Fall 2021
 
 ## Milestone 2
 
-This milestone was definitly a lot more difficult than the last milestone however I managed to complete all of my goals for it. 
+This milestone was definitly a lot more difficult than the last milestone however I did manage to complete all of my goals for it. 
 
-In terms of what I struggled with a lot of it was learning Mirror's Documentation (https://mirror-networking.gitbook.io/docs/) and how to use it. I eventually figured out how it worked but I am more than sure that some of my code/transfers to and from the server could be more efficient. 
+In terms of what I struggled with a lot of it was learning Mirror's Documentation (https://mirror-networking.gitbook.io/docs/) and how to use it. I eventually figured out how the basics of it worked, but I am more than sure that some of my code/transfers to and from the server could be more efficient. 
+
+The main issue that I had with the code was figuring out how to get a reference to the other player. I probably looked at 10 different tutorials on how to do multiplayer in Unity with and without Mirror to try and get some idea on how it would work. I eventually got each player to hold a reference to the other by calling a method on the clients when the server detects the number of players is equal to two.  
 
 Running this milestone should be similar to the previous way to run it except I have included a package called ParelSync which allows for clones of the Unity Project to exist. You'll want to open up ParelSync and create at least one new clone in the Clones Manager tab so you can have both a host and another client open at the same time. You can then select host on one of the Unity Projects and client on the other in order to play around with both players and interact with each other. 
 
