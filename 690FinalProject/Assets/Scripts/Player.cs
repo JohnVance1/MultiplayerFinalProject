@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
+/// <summary>
+/// The main player class
+/// </summary>
 public class Player : NetworkBehaviour
 {
     public Rigidbody2D _playerRB;
@@ -18,6 +21,7 @@ public class Player : NetworkBehaviour
     private GameObject currentWeapon;
     private WeaponScript currentWeaponScript;
 
+    // Reference to the player's name
     [SyncVar]
     public string playerName;
 
@@ -39,15 +43,14 @@ public class Player : NetworkBehaviour
     public GameObject playerMovePos;
     private GameObject otherMovePos;
 
+    // The reference to the other player
     [SerializeField] [SyncVar]
     private Player otherPlayer;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
-        gameObject.name = playerName;
-
-        
+        gameObject.name = playerName;        
 
     }
 

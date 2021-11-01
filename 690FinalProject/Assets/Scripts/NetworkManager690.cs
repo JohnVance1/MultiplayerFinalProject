@@ -27,29 +27,23 @@ namespace Mirror
             // spawn target if two players
             if (numPlayers == 2)
             {
+                // Gets the first player
                 if (NetworkServer.connections.TryGetValue(players[0], out NetworkConnectionToClient ni))
                 {
+                    // Gets the second player
                     if (NetworkServer.connections.TryGetValue(players[1], out NetworkConnectionToClient ni2))
                     {
+                        // Sets the second player reference to the first player
                         ni.identity.gameObject.GetComponent<Player>().SetPlayer(
                             ni2.identity.gameObject.GetComponent<Player>());
+
+                        // Sets the first player reference to the second player
                         ni2.identity.gameObject.GetComponent<Player>().SetPlayer(
                             ni.identity.gameObject.GetComponent<Player>());
 
                     }
                 }
-                //NetworkServer.connections[1].identity.gameObject.GetComponent<Player>().CmdSetOtherPlayer(
-                    //NetworkServer.connections[0].identity.gameObject.GetComponent<Player>());
-
-                //foreach (KeyValuePair<int, NetworkConnectionToClient> ni in NetworkServer.connections)
-                //{
-                //    if (ni.Value.identity.gameObject.GetComponent<Player>() != this)
-                //    {
-
-                //    }
-                //    Debug.Log(ni.Value.identity);
-
-                //}
+                
 
             }
         }
