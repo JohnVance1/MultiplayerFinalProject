@@ -11,6 +11,7 @@ In terms of what I struggled with a lot of it was learning Mirror's Documentatio
 Running this milestone should be similar to the previous way to run it except I have included a package called ParelSync which allows for clones of the Unity Project to exist. You'll want to open up ParelSync and create at least one new clone in the Clones Manager tab so you can have both a host and another client open at the same time. You can then select host on one of the Unity Projects and client on the other in order to play around with both players and interact with each other. 
 
 In terms of controls they are the same as in the last milestone.
+
 Controls:
  - W - To jump
  - A - To move left
