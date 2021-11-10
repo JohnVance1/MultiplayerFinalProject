@@ -42,6 +42,7 @@ public class Player : NetworkBehaviour
     [SerializeField]
     public GameObject playerMovePos;
     private GameObject otherMovePos;
+    private Vector3 otherMoveVec;
 
     // The reference to the other player
     [SerializeField] [SyncVar]
@@ -74,6 +75,8 @@ public class Player : NetworkBehaviour
         moveToPlayer = false;
         currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         grabbed = false;
+
+        
 
         if (spawn != null)
         {
@@ -117,7 +120,7 @@ public class Player : NetworkBehaviour
 
         }
 
-        if (letGo && otherPlayer != null)
+        if (letGo && /*otherPlayer != null &&*/ otherMoveVec != Vector3.zero)
         {
             CmdLetGo(otherPlayer, this);
         }
@@ -188,18 +191,18 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SetPlayer(Player other)
+    public void SetPlayer(Vector3 other)
     {
-        otherPlayer = other;
-        otherMovePos = otherPlayer.playerMovePos;
+        otherMoveVec = other;
+        //otherMovePos = otherPlayer.playerMovePos;
         CmdSetPlayer(other);
     }
 
     [Command(requiresAuthority = false)]
-    public void CmdSetPlayer(Player other)
+    public void CmdSetPlayer(Vector3 other)
     {
-        otherPlayer = other;
-        otherMovePos = otherPlayer.playerMovePos;
+        otherMoveVec = other;
+        //otherMovePos = otherPlayer.playerMovePos;
         
     }
 
