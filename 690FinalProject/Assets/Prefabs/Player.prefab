@@ -173,6 +173,7 @@ GameObject:
   - component: {fileID: 7939915930381876936}
   - component: {fileID: 2328451953004967850}
   - component: {fileID: 8667979543947338687}
+  - component: {fileID: -4137039594664746767}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -355,7 +356,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   clientAuthority: 1
-  sendInterval: 0.05
+  sendInterval: 0.001
   syncPosition: 1
   syncRotation: 1
   syncScale: 1
@@ -421,6 +422,20 @@ MonoBehaviour:
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   target: {fileID: 99464017699525001}
+--- !u!114 &-4137039594664746767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99464018691673427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc654f29862fc2643b948f772ebb9e68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 1, g: 1, b: 1, a: 1}
+  padding: 2
 --- !u!1 &4975982399523543788
 GameObject:
   m_ObjectHideFlags: 0

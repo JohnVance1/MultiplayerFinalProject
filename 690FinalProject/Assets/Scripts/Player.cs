@@ -120,7 +120,7 @@ public class Player : NetworkBehaviour
 
         }
 
-        if (letGo && /*otherPlayer != null &&*/ otherMoveVec != Vector3.zero)
+        if (letGo && otherPlayer != null || otherMoveVec != Vector3.zero)
         {
             CmdLetGo(otherPlayer, this);
         }
@@ -191,19 +191,19 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SetPlayer(Vector3 other)
+    public void SetPlayer(Player other)
     {
-        otherMoveVec = other;
-        //otherMovePos = otherPlayer.playerMovePos;
+        otherPlayer = other;
+        otherMovePos = otherPlayer.playerMovePos;
         CmdSetPlayer(other);
     }
 
     [Command(requiresAuthority = false)]
-    public void CmdSetPlayer(Vector3 other)
+    public void CmdSetPlayer(Player other)
     {
-        otherMoveVec = other;
-        //otherMovePos = otherPlayer.playerMovePos;
-        
+        otherPlayer = other;
+        otherMovePos = otherPlayer.playerMovePos;
+
     }
 
 

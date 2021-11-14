@@ -36,11 +36,11 @@ namespace Mirror
                     {
                         // Sets the second player reference to the first player
                         ni.identity.gameObject.GetComponent<Player>().SetPlayer(
-                            ni2.identity.gameObject.GetComponent<Player>().playerMovePos.transform.position);
+                            ni2.identity.gameObject.GetComponent<Player>());
 
                         // Sets the first player reference to the second player
                         ni2.identity.gameObject.GetComponent<Player>().SetPlayer(
-                            ni.identity.gameObject.GetComponent<Player>().playerMovePos.transform.position);
+                            ni.identity.gameObject.GetComponent<Player>());
 
                     }
                 }
