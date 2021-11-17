@@ -75,6 +75,7 @@ public class Player : NetworkBehaviour
         moveToPlayer = false;
         currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         grabbed = false;
+        //otherMovePos = otherPlayer.playerMovePos;
 
         
 
@@ -120,7 +121,12 @@ public class Player : NetworkBehaviour
 
         }
 
-        if (letGo && otherPlayer != null || otherMoveVec != Vector3.zero)
+        if(letGo)
+        {
+            Debug.Log(0);
+        }
+
+        if (letGo && otherPlayer != null)
         {
             CmdLetGo(otherPlayer, this);
         }
@@ -136,13 +142,16 @@ public class Player : NetworkBehaviour
         if (grabbing)
         {
             //CmdGrab();
-            Debug.Log("letGo: " + letGo);
-            Debug.Log("grabbed");
-            if (otherMovePos.transform.position == transform.position)
-            { 
-                CmdParent(otherPlayer, gameObject);
+            //Debug.Log("transform Pos:" + transform.position);
+            //Vector3 currentMovePos = otherMovePos.transform.position;
+            //currentMovePos.y -= 2f;
+            //Debug.Log("otherMovePos Pos:" + currentMovePos);
+
+            //if (Vector3.Distance(currentMovePos, transform.position) <= 0.1f)
+            //{ 
+            //    //CmdParent(otherPlayer, gameObject);
                 
-            }
+            //}
         }
 
         
@@ -153,11 +162,11 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdLetGo(Player other, Player current)
     {
-        other.GetComponent<BoxCollider2D>().enabled = true;
-        other.transform.parent = null;
-        other._playerRB.simulated = true;
-        other.moveToPlayer = false;
-        other.grabbed = false;
+        //other.GetComponent<BoxCollider2D>().enabled = true;
+        //other.transform.parent = null;
+        //other._playerRB.simulated = true;
+        //other.moveToPlayer = false;
+        //other.grabbed = false;
         RpcLetGo(other, current);
     }
 
@@ -210,7 +219,6 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdGrab()
     {
-        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         //notShooting = true;
 
         RpcRetract();
@@ -219,6 +227,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     public void RpcRetract()
     {
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         currentWeaponScript.DistanceRetract(dir);
         letGo = true;
         grabbing = false; 
@@ -229,7 +238,7 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdNotShooting()
     {
-        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
+        
 
         RpcNotShooting();
     }
@@ -237,6 +246,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     public void RpcNotShooting()
     {
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         currentWeaponScript.DistanceRetract(dir);
 
 
@@ -245,7 +255,6 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdShoot()
     {
-        currentWeapon.GetComponent<BoxCollider2D>().enabled = true;
 
         RpcExtend();
     }
@@ -253,6 +262,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     public void RpcExtend()
     {
+        currentWeapon.GetComponent<BoxCollider2D>().enabled = true;
         currentWeaponScript.DistanceGrab(dir);
         letGo = false;
         notShooting = false;
@@ -343,24 +353,39 @@ public class Player : NetworkBehaviour
 
     }
 
-    [ServerCallback] 
+    [Client] 
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
         {
             //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
             //col.GetComponent<WeaponScript>().retract = true;
-            RpcGrabbing(otherPlayer, this);
-            RpcOffColliders(this);
+            otherPlayer = col.transform.parent.gameObject.GetComponent<Player>();
+            otherMovePos = otherPlayer.playerMovePos;
+            CmdGrabbing(otherPlayer, this);
+            CmdOffColliders(this);
 
         }
     }
 
+    [Command]
+    public void CmdOffColliders(Player current)
+    {
+        RpcOffColliders(current);
+
+    }
+
     [ClientRpc]
-    public void RpcOffColliders(Player current)
+    void RpcOffColliders(Player current)
     {
         GetComponent<BoxCollider2D>().enabled = false;
         _playerRB.simulated = false;
+    }
+
+    [Command]
+    public void CmdGrabbing(Player other, Player current)
+    {
+        RpcGrabbing(other, current);
 
     }
 
@@ -368,6 +393,9 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     public void RpcGrabbing(Player other, Player current)
     {
+        otherPlayer = other;
+        otherMovePos = other.playerMovePos;
+        otherPlayer.otherPlayer = current;
         if (other.grabbing == false)
         {
             other.grabbing = true;
