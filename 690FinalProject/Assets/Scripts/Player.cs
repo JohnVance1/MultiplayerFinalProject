@@ -33,7 +33,7 @@ public class Player : NetworkBehaviour
     public bool notShooting;
     public bool grabbing;
     public bool grabbed;
-
+    public bool stayAttached;
 
     // Target code
     public bool moveToPlayer;
@@ -42,6 +42,8 @@ public class Player : NetworkBehaviour
     [SerializeField]
     public GameObject playerMovePos;
     private GameObject otherMovePos;
+
+    [SerializeField] [SyncVar]
     private Vector3 otherMoveVec;
 
     // The reference to the other player
@@ -75,9 +77,7 @@ public class Player : NetworkBehaviour
         moveToPlayer = false;
         currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         grabbed = false;
-        //otherMovePos = otherPlayer.playerMovePos;
-
-        
+        stayAttached = false;
 
         if (spawn != null)
         {
@@ -95,7 +95,6 @@ public class Player : NetworkBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            //notShooting = false;
             if (grabbed == false)
             {
                 if (grabbing)
@@ -110,7 +109,7 @@ public class Player : NetworkBehaviour
             
         }
 
-        if (Input.GetMouseButtonUp(0))// && grabbing == true)
+        if (Input.GetMouseButtonUp(0))
         {
             CmdGrab();
         }
@@ -121,106 +120,34 @@ public class Player : NetworkBehaviour
 
         }
 
-        if(letGo)
-        {
-            Debug.Log(0);
-        }
-
         if (letGo && otherPlayer != null)
         {
-            CmdLetGo(otherPlayer, this);
+            CmdLetGo(otherPlayer);
         }
-
 
         Flip();
-
-
-
-        #region Rest of grab code
-        
-
-        if (grabbing)
-        {
-            //CmdGrab();
-            //Debug.Log("transform Pos:" + transform.position);
-            //Vector3 currentMovePos = otherMovePos.transform.position;
-            //currentMovePos.y -= 2f;
-            //Debug.Log("otherMovePos Pos:" + currentMovePos);
-
-            //if (Vector3.Distance(currentMovePos, transform.position) <= 0.1f)
-            //{ 
-            //    //CmdParent(otherPlayer, gameObject);
-                
-            //}
-        }
-
-        
-
-        #endregion
+       
     }
 
     [Command]
-    public void CmdLetGo(Player other, Player current)
+    public void CmdLetGo(Player other)
     {
-        //other.GetComponent<BoxCollider2D>().enabled = true;
-        //other.transform.parent = null;
-        //other._playerRB.simulated = true;
-        //other.moveToPlayer = false;
-        //other.grabbed = false;
-        RpcLetGo(other, current);
+        RpcLetGo(other);
     }
 
     [ClientRpc]
-    public void RpcLetGo(Player other, Player current)
+    public void RpcLetGo(Player other)
     {
+        other.stayAttached = false;
         other.GetComponent<BoxCollider2D>().enabled = true;
-        other.transform.parent = null;
         other._playerRB.simulated = true;
         other.moveToPlayer = false;
         other.grabbed = false;
     }
 
     [Command]
-    public void CmdParent(Player other, GameObject gO)
-    {
-        gO.transform.parent = other.transform;
-        //gO.GetComponent<Player>().grabbing = false;
-        RpcParent(other, gO);
-
-    }
-
-    [ClientRpc]
-    public void RpcParent(Player other, GameObject gO)
-    {
-        gO.transform.parent = other.transform;
-        //gO.GetComponent<Player>().grabbing = false;
-
-        Debug.Log("Transform Set");
-
-    }
-
-    [ClientRpc]
-    public void SetPlayer(Player other)
-    {
-        otherPlayer = other;
-        otherMovePos = otherPlayer.playerMovePos;
-        CmdSetPlayer(other);
-    }
-
-    [Command(requiresAuthority = false)]
-    public void CmdSetPlayer(Player other)
-    {
-        otherPlayer = other;
-        otherMovePos = otherPlayer.playerMovePos;
-
-    }
-
-
-    [Command]
     public void CmdGrab()
-    {
-        //notShooting = true;
-
+    {       
         RpcRetract();
     }
 
@@ -238,8 +165,6 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdNotShooting()
     {
-        
-
         RpcNotShooting();
     }
 
@@ -249,13 +174,11 @@ public class Player : NetworkBehaviour
         currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         currentWeaponScript.DistanceRetract(dir);
 
-
     }
 
     [Command]
     public void CmdShoot()
     {
-
         RpcExtend();
     }
 
@@ -278,17 +201,20 @@ public class Player : NetworkBehaviour
 
         if (moveToPlayer)
         {
-            MoveTo(otherMovePos.transform.position);
-            GetComponent<BoxCollider2D>().enabled = false;
-            _playerRB.simulated = false;
+            if (!stayAttached)
+            {
+                CmdMoveTo(otherMovePos.transform.position);
+            }
+            else
+            {
+                transform.position = otherMovePos.transform.position;
+            }
         }
         else
         {
             Move();
         }
-    }
-
-    
+    }    
 
     [Client]
     public void Flip()
@@ -345,65 +271,83 @@ public class Player : NetworkBehaviour
 
     }
 
-    [Client]
-    public void MoveTo(Vector3 weaponPos)
+    [Command]
+    public void CmdMoveTo(Vector3 weaponPos)
     {
-        float step = 10 * Time.deltaTime;
+        RpcMoveTo(weaponPos);
+    }
+
+    [ClientRpc]
+    public void RpcMoveTo(Vector3 weaponPos)
+    {
+        GetComponent<BoxCollider2D>().enabled = false;
+        _playerRB.simulated = false;
+
+        float step = 0.5f;
+        Debug.Log(step);
         transform.position = Vector3.MoveTowards(transform.position, weaponPos, step);
+
+        if (Vector3.Distance(otherMovePos.transform.position, transform.position) <= 0.1f)
+        {
+            stayAttached = true;
+        }
 
     }
 
     [Client] 
     void OnTriggerEnter2D(Collider2D col)
     {
+        if(!isLocalPlayer)
+        {
+            return;
+        }
+
         if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
         {
-            //col.transform.parent.GetComponent<Player>().moveToPlayer = true;
-            //col.GetComponent<WeaponScript>().retract = true;
             otherPlayer = col.transform.parent.gameObject.GetComponent<Player>();
             otherMovePos = otherPlayer.playerMovePos;
-            CmdGrabbing(otherPlayer, this);
-            CmdOffColliders(this);
+
+            CmdGrabbing(otherPlayer);
+            CmdOffColliders();
 
         }
     }
 
     [Command]
-    public void CmdOffColliders(Player current)
+    public void CmdOffColliders()
     {
-        RpcOffColliders(current);
+        RpcOffColliders();
 
     }
 
     [ClientRpc]
-    void RpcOffColliders(Player current)
+    void RpcOffColliders()
     {
         GetComponent<BoxCollider2D>().enabled = false;
         _playerRB.simulated = false;
     }
 
     [Command]
-    public void CmdGrabbing(Player other, Player current)
+    public void CmdGrabbing(Player other)
     {
-        RpcGrabbing(other, current);
+        RpcGrabbing(other);
 
     }
 
 
     [ClientRpc]
-    public void RpcGrabbing(Player other, Player current)
+    public void RpcGrabbing(Player other)
     {
         otherPlayer = other;
         otherMovePos = other.playerMovePos;
-        otherPlayer.otherPlayer = current;
+        otherPlayer.otherPlayer = this;
+
         if (other.grabbing == false)
         {
             other.grabbing = true;
-            current.grabbed = true;
-            current.moveToPlayer = true;
+            this.grabbed = true;
+            this.moveToPlayer = true;
             
-            Debug.Log("HIT");
-
         }
 
     }
