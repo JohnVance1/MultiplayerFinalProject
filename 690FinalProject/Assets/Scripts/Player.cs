@@ -50,6 +50,9 @@ public class Player : NetworkBehaviour
     [SerializeField] [SyncVar]
     private Player otherPlayer;
 
+    /// <summary>
+    /// When the Server starts
+    /// </summary>
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -57,6 +60,9 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// When this Client starts
+    /// </summary>
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -66,7 +72,6 @@ public class Player : NetworkBehaviour
 
     }
 
-    //[Client]
     void Start()
     {
         dir = 1;
@@ -97,12 +102,15 @@ public class Player : NetworkBehaviour
         {
             if (grabbed == false)
             {
+                // If this Player is grabbing the other Player
                 if (grabbing)
                 {
+                    // Turns off the colliders when grabbing
                     CmdNotShooting();
                 }
                 else
                 {
+                    // Moves the weapon out to be able to grab
                     CmdShoot();
                 }
             }
@@ -111,30 +119,43 @@ public class Player : NetworkBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
+            // Moves the weapon back
             CmdGrab();
         }
 
         if(notShooting)
         {
+            // Moves the weapon back when the Player is grabbed
             CmdNotShooting();
 
         }
 
+        // Checks to see if the Player is letting go of the other Player
         if (letGo && otherPlayer != null)
         {
+            // Lets go of the other Player
             CmdLetGo(otherPlayer);
         }
 
+        // Turns the Player correctly
         Flip();
        
     }
 
+    /// <summary>
+    /// The Command call for when the Player lets go of the other Player
+    /// </summary>
+    /// <param name="other"></param>
     [Command]
     public void CmdLetGo(Player other)
     {
         RpcLetGo(other);
     }
 
+    /// <summary>
+    /// The RPC call for when the Player lets go of the other Player
+    /// </summary>
+    /// <param name="other"></param>
     [ClientRpc]
     public void RpcLetGo(Player other)
     {
@@ -145,12 +166,19 @@ public class Player : NetworkBehaviour
         other.grabbed = false;
     }
 
+    /// <summary>
+    /// The Command for retracting the weapon and turning off the weapon's collider
+    /// Only called when the other Player isn't grabbed
+    /// </summary>
     [Command]
     public void CmdGrab()
     {       
         RpcRetract();
     }
 
+    /// <summary>
+    /// The RPC call for retracting the weapon and turning off the weapon's collider
+    /// </summary>
     [ClientRpc]
     public void RpcRetract()
     {
@@ -162,12 +190,19 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// The Command for retracting the weapon and turning off the weapon's collider
+    /// Only ran when the the other Player is grabbed
+    /// </summary>
     [Command]
     public void CmdNotShooting()
     {
         RpcNotShooting();
     }
 
+    /// <summary>
+    /// The RPC call for retracting the weapon and turning off the weapon's collider
+    /// </summary>
     [ClientRpc]
     public void RpcNotShooting()
     {
@@ -176,12 +211,19 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// The Command call for turning back on the weapon's box collider and moving it forward
+    /// This allows for the Player to use their weapon and grab the other Player
+    /// </summary>
     [Command]
     public void CmdShoot()
     {
         RpcExtend();
     }
 
+    /// <summary>
+    /// The RPC call for turning back on the weapon's box collider and moving it forward
+    /// </summary>
     [ClientRpc]
     public void RpcExtend()
     {
@@ -191,31 +233,38 @@ public class Player : NetworkBehaviour
         notShooting = false;
     }
 
-    //[Client]
     private void FixedUpdate()
     {
+        // Checks to make sure this is the local player
         if (!isLocalPlayer)
         {
             return;
         }
 
+        // If we can move the Player
         if (moveToPlayer)
         {
             if (!stayAttached)
             {
+                // Move to the other Player's grab loc
                 CmdMoveTo(otherMovePos.transform.position);
             }
             else
             {
+                // Keep the grabbed Player on the Player grabbing
                 transform.position = otherMovePos.transform.position;
             }
         }
         else
         {
+            // Regular Player movement
             Move();
         }
     }    
 
+    /// <summary>
+    /// Allows for the Players to move back and forth
+    /// </summary>
     [Client]
     public void Flip()
     {
@@ -234,6 +283,9 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// Regular Player movement
+    /// </summary>
     [Client]
     public void Move()
     {
@@ -247,6 +299,10 @@ public class Player : NetworkBehaviour
         
     }
 
+    /// <summary>
+    /// Checks to see if the Player is grounded or not
+    /// </summary>
+    /// <returns></returns>
     [Client]
     private bool IsGrounded()
     {
@@ -263,6 +319,9 @@ public class Player : NetworkBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks to see if the Player is dead and respawns them
+    /// </summary>
     [Client]
     public void Dead()
     {
@@ -271,12 +330,20 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// The Command call to move the Player to the other Player's grab pos
+    /// </summary>
+    /// <param name="weaponPos"></param>
     [Command]
     public void CmdMoveTo(Vector3 weaponPos)
     {
         RpcMoveTo(weaponPos);
     }
 
+    /// <summary>
+    /// The RPC call to move the Player to the other Player's grab pos
+    /// </summary>
+    /// <param name="weaponPos"></param>
     [ClientRpc]
     public void RpcMoveTo(Vector3 weaponPos)
     {
@@ -294,6 +361,10 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// Checking collisions between the Player and the weapon
+    /// </summary>
+    /// <param name="col"></param>
     [Client] 
     void OnTriggerEnter2D(Collider2D col)
     {
@@ -313,6 +384,9 @@ public class Player : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// The Command call for turning off the colliders on the Player being grabbed
+    /// </summary>
     [Command]
     public void CmdOffColliders()
     {
@@ -320,6 +394,9 @@ public class Player : NetworkBehaviour
 
     }
 
+    /// <summary>
+    /// The RPC call for turning off the colliders on the Player being grabbed
+    /// </summary>
     [ClientRpc]
     void RpcOffColliders()
     {
@@ -327,6 +404,10 @@ public class Player : NetworkBehaviour
         _playerRB.simulated = false;
     }
 
+    /// <summary>
+    /// The Command call for actually grabbing the other Player
+    /// </summary>
+    /// <param name="other"></param>
     [Command]
     public void CmdGrabbing(Player other)
     {
@@ -334,7 +415,10 @@ public class Player : NetworkBehaviour
 
     }
 
-
+    /// <summary>
+    /// The RPC call for actually grabbing the other Player
+    /// </summary>
+    /// <param name="other"></param>
     [ClientRpc]
     public void RpcGrabbing(Player other)
     {
