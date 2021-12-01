@@ -11,7 +11,7 @@ namespace Mirror
     {
         public Transform playerLeftSpawn;
         public Transform playerRightSpawn;
-        GameObject target;
+        public GameObject weapon;
         private int i = 0;
         public List<int> players;
 
@@ -24,15 +24,22 @@ namespace Mirror
             NetworkServer.AddPlayerForConnection(conn, player);
             players.Add(conn.connectionId);
 
+            if(numPlayers >= 2)
+            {
+                weapon = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Weapon"));
+                NetworkServer.Spawn(weapon);
+
+            }
+
             
         }
 
 
         public override void OnServerDisconnect(NetworkConnection conn)
         {
-            // destroy ball
-            if (target != null)
-                NetworkServer.Destroy(target);
+            // destroy weapon
+            if (weapon != null)
+                NetworkServer.Destroy(weapon);
 
             // call base functionality (actually destroys the player)
             base.OnServerDisconnect(conn);

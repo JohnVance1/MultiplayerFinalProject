@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class WeaponScript : MonoBehaviour
+public class WeaponScript : NetworkBehaviour
 {
     public bool letGo;
     public float speed;
-
 
     public Vector3 startPos;
 
@@ -67,17 +66,15 @@ public class WeaponScript : MonoBehaviour
 
     }
 
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    if (collision.gameObject.GetComponent<Player>())
-    //    {
-    //        collision.gameObject.GetComponent<Player>().moveToPlayer = true;
-    //        retract = true;
-    //        Debug.Log("HIT");
-    //    }
+    [Server]
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.gameObject.GetComponent<Player>())
+        {
+            Debug.Log("Pickuped Weapon");
 
+        }
 
-    //}
-
+    }
 
 }

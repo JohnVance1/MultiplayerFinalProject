@@ -416,9 +416,10 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 1
   spawnPrefabs:
-  - {fileID: 0}
+  - {fileID: 8596857167562350277, guid: aa020108f8513f94e8590e2e1e15b2d1, type: 3}
   playerLeftSpawn: {fileID: 1090380065}
   playerRightSpawn: {fileID: 1802563877}
+  weapon: {fileID: 0}
   players: 
 --- !u!4 &1035172197
 Transform:

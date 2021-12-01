@@ -76,11 +76,11 @@ public class Player : NetworkBehaviour
     {
         dir = 1;
         _playerRB = GetComponent<Rigidbody2D>();
-        currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
+        //currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
         letGo = false;
-        playerMovePos = transform.GetChild(2).gameObject;
+        //playerMovePos = transform.GetChild(1).gameObject;
         moveToPlayer = false;
-        currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
+        //currentWeapon.GetComponent<BoxCollider2D>().enabled = false;
         grabbed = false;
         stayAttached = false;
 
@@ -98,45 +98,47 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        if (Input.GetMouseButton(0))
+        if (currentWeapon != null)
         {
-            if (grabbed == false)
+            if (Input.GetMouseButton(0))
             {
-                // If this Player is grabbing the other Player
-                if (grabbing)
+                if (grabbed == false)
                 {
-                    // Turns off the colliders when grabbing
-                    CmdNotShooting();
+                    // If this Player is grabbing the other Player
+                    if (grabbing)
+                    {
+                        // Turns off the colliders when grabbing
+                        CmdNotShooting();
+                    }
+                    else
+                    {
+                        // Moves the weapon out to be able to grab
+                        CmdShoot();
+                    }
                 }
-                else
-                {
-                    // Moves the weapon out to be able to grab
-                    CmdShoot();
-                }
+
             }
-            
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                // Moves the weapon back
+                CmdGrab();
+            }
+
+            if (notShooting)
+            {
+                // Moves the weapon back when the Player is grabbed
+                CmdNotShooting();
+
+            }
+
+            // Checks to see if the Player is letting go of the other Player
+            if (letGo && otherPlayer != null)
+            {
+                // Lets go of the other Player
+                CmdLetGo(otherPlayer);
+            }
         }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            // Moves the weapon back
-            CmdGrab();
-        }
-
-        if(notShooting)
-        {
-            // Moves the weapon back when the Player is grabbed
-            CmdNotShooting();
-
-        }
-
-        // Checks to see if the Player is letting go of the other Player
-        if (letGo && otherPlayer != null)
-        {
-            // Lets go of the other Player
-            CmdLetGo(otherPlayer);
-        }
-
         // Turns the Player correctly
         Flip();
        
@@ -368,7 +370,7 @@ public class Player : NetworkBehaviour
     [Client] 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(!isLocalPlayer)
+        if(!isLocalPlayer || currentWeapon == null)
         {
             return;
         }
