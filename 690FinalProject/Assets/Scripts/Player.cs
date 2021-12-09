@@ -370,9 +370,14 @@ public class Player : NetworkBehaviour
     [Client] 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(!isLocalPlayer || currentWeapon == null)
+        if(!isLocalPlayer)
         {
             return;
+        }
+
+        if (currentWeapon == null && col.transform.GetComponent<WeaponScript>() && !col.transform.root.GetComponent<Player>())
+        {
+            CmdPickupItem(col.GetComponent<NetworkIdentity>(), this.GetComponent<NetworkIdentity>());
         }
 
         if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
@@ -381,9 +386,31 @@ public class Player : NetworkBehaviour
             otherMovePos = otherPlayer.playerMovePos;
 
             CmdGrabbing(otherPlayer);
+            //RpcGrabbing(otherPlayer);
             CmdOffColliders();
+            //RpcOffColliders();
 
         }
+        
+    }
+
+    [Command]
+    void CmdPickupItem(NetworkIdentity item, NetworkIdentity playerID)
+    {
+        item.AssignClientAuthority(playerID.connectionToClient);
+        //currentWeapon = item.gameObject;
+        //currentWeapon.transform.parent = gameObject.transform;
+        RpcPickupItem(item, playerID);
+        item.RemoveClientAuthority();
+    }
+
+    [ClientRpc]
+    void RpcPickupItem(NetworkIdentity item, NetworkIdentity playerID)
+    {
+        //item.AssignClientAuthority(playerID.connectionToClient);
+        currentWeapon = item.gameObject;
+        currentWeapon.transform.parent = gameObject.transform;
+        currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
     }
 
     /// <summary>

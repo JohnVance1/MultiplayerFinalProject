@@ -66,12 +66,19 @@ public class WeaponScript : NetworkBehaviour
 
     }
 
+    [ClientRpc]
+    void RpcPickupItem(NetworkIdentity item)
+    {
+        item.AssignClientAuthority(connectionToClient);
+    }
+
     [Server]
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.gameObject.GetComponent<Player>())
         {
             Debug.Log("Pickuped Weapon");
+            //RpcPickupItem(GetComponent<NetworkIdentity>());
 
         }
 
