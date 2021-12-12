@@ -17,7 +17,7 @@ public class Player : NetworkBehaviour
     private float horizontalInput;
 
     
-    private SyncDictionary<string, string> addresses;
+    private SyncDictionary<string, string> addresses = new SyncDictionary<string, string>();
 
     [SerializeField]
     private LayerMask layers;
@@ -62,7 +62,6 @@ public class Player : NetworkBehaviour
     {
         base.OnStartServer();
         gameObject.name = playerName;
-        addresses = new SyncDictionary<string, string>();
 
     }
 
@@ -74,8 +73,8 @@ public class Player : NetworkBehaviour
         base.OnStartClient();
 
         gameObject.name = playerName;
-        addresses.Add(LocalIPAddress(), RandomCode());
-
+        addresses.Add(LocalIPAddress(), Encode());
+        
     }
 
     void Start()
@@ -420,15 +419,51 @@ public class Player : NetworkBehaviour
     }
 
     [Server]
-    public string RandomCode()
+    public string Encode()
     {
         const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        string ip = LocalIPAddress();
         string code = "";
-        for (int i = 0; i < 4; i++)
+        string[] parts;
+
+        parts = ip.Split('.');
+
+        foreach(string str in parts)
         {
-            code += letters.Substring(Random.Range(0, 25), 1);
+            if(str.Length > 2)
+            {
+                int x = int.Parse(str.Substring(0, 2));
+                code += letters.Substring(x, 1);
+                code += letters.Substring(int.Parse(str.Substring(2, 1)), 1);
+            }
+            else if(int.Parse(str) > 25)
+            {
+                code += letters.Substring(int.Parse(str.Substring(0, 1)), 1);
+                code += letters.Substring(int.Parse(str.Substring(1, 1)), 1);
+
+            }
+            else
+            {
+                code += letters.Substring(int.Parse(str), 1);
+
+            }
+
+
+
         }
+
+        Debug.Log(code);
         return code;
+
+    }
+
+    [Client]
+    public void Decode(string code)
+    {
+        string[] parts;
+        parts = code.Split();
+
+
 
     }
 
@@ -436,7 +471,7 @@ public class Player : NetworkBehaviour
     public void OnGUI()
     {
         addresses.TryGetValue(LocalIPAddress(), out string val);
-        GUI.Label(new Rect(10, 10, 100, 20), "Local IP:" + val); 
+        GUI.Label(new Rect(10, 10, 150, 40), "Local IP:" + LocalIPAddress()); 
 
     }
 
