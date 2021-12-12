@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using System.Net;
+using System.Net.Sockets;
 
 /// <summary>
 /// The main player class
@@ -13,6 +15,9 @@ public class Player : NetworkBehaviour
     private float _speedVertical = 20;
 
     private float horizontalInput;
+
+    
+    private SyncDictionary<string, string> addresses;
 
     [SerializeField]
     private LayerMask layers;
@@ -56,7 +61,8 @@ public class Player : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        gameObject.name = playerName;        
+        gameObject.name = playerName;
+        addresses = new SyncDictionary<string, string>();
 
     }
 
@@ -68,7 +74,7 @@ public class Player : NetworkBehaviour
         base.OnStartClient();
 
         gameObject.name = playerName;
-
+        addresses.Add(LocalIPAddress(), RandomCode());
 
     }
 
@@ -97,6 +103,8 @@ public class Player : NetworkBehaviour
         {
             return;
         }
+
+        Debug.Log(LocalIPAddress());
 
         if (currentWeapon != null)
         {
@@ -392,6 +400,44 @@ public class Player : NetworkBehaviour
 
         }
         
+    }
+
+    [Server]
+    public static string LocalIPAddress()
+    {
+        IPHostEntry host;
+        string localIP = "0.0.0.0";
+        host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (IPAddress ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                localIP = ip.ToString();
+                break;
+            }
+        }
+        return localIP;
+    }
+
+    [Server]
+    public string RandomCode()
+    {
+        const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        string code = "";
+        for (int i = 0; i < 4; i++)
+        {
+            code += letters.Substring(Random.Range(0, 25), 1);
+        }
+        return code;
+
+    }
+
+    [Client]
+    public void OnGUI()
+    {
+        addresses.TryGetValue(LocalIPAddress(), out string val);
+        GUI.Label(new Rect(10, 10, 100, 20), "Local IP:" + val); 
+
     }
 
     [Command]
