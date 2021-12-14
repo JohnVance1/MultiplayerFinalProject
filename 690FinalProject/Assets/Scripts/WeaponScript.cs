@@ -17,7 +17,7 @@ public class WeaponScript : NetworkBehaviour
         letGo = false;
         speed = 10;
         retract = false;
-        startPos = transform.localPosition;
+        //startPos = transform.localPosition;
 
     }
 
@@ -29,10 +29,11 @@ public class WeaponScript : NetworkBehaviour
 
     public void DistanceGrab(int dir)   
     {
-        
-        if (transform.localPosition.x <= 4)
+        Debug.Log(dir);
+
+        if (transform.localPosition.x <= startPos.x + 4f)
         {
-            transform.position += new Vector3((Time.deltaTime * speed * dir), 0, 0);
+            transform.localPosition += new Vector3((Time.deltaTime * speed), 0, 0);
         }
 
 
@@ -58,12 +59,11 @@ public class WeaponScript : NetworkBehaviour
 
     public void DistanceRetract(int dir)
     {
-        if (transform.localPosition.x > 0.7)
+        Debug.Log(dir);
+        if (transform.localPosition.x > startPos.x)
         {
-            transform.position -= new Vector3((Time.deltaTime * speed * dir), 0, 0);
+            transform.localPosition -= new Vector3((Time.deltaTime * speed), 0, 0);
         }      
-
-
     }
 
     [ClientRpc]
@@ -72,7 +72,7 @@ public class WeaponScript : NetworkBehaviour
         item.AssignClientAuthority(connectionToClient);
     }
 
-    [Server]
+    [Client]
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.gameObject.GetComponent<Player>())
