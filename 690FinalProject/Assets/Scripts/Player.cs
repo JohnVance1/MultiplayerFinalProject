@@ -16,14 +16,19 @@ public class Player : NetworkBehaviour
 
     private float horizontalInput;
 
+    private Vector3 scale;
+    [SerializeField]
+    private Transform sprite;
     
-    private SyncDictionary<string, string> addresses;
-
     [SerializeField]
     private LayerMask layers;
 
     [SerializeField]
+    private Transform wepPos;
+
+    [SerializeField]
     private GameObject currentWeapon;
+    [SerializeField]
     private WeaponScript currentWeaponScript;
 
     // Reference to the player's name
@@ -62,7 +67,6 @@ public class Player : NetworkBehaviour
     {
         base.OnStartServer();
         gameObject.name = playerName;
-        addresses = new SyncDictionary<string, string>();
 
     }
 
@@ -74,12 +78,13 @@ public class Player : NetworkBehaviour
         base.OnStartClient();
 
         gameObject.name = playerName;
-        addresses.Add(LocalIPAddress(), RandomCode());
+        //addresses.Add(LocalIPAddress(), RandomCode());
 
     }
 
     void Start()
     {
+        scale = sprite.localScale;
         dir = 1;
         _playerRB = GetComponent<Rigidbody2D>();
         //currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
@@ -104,7 +109,8 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        Debug.Log(LocalIPAddress());
+        //Debug.Log(LocalIPAddress());
+        Flip();
 
         if (currentWeapon != null)
         {
@@ -146,10 +152,11 @@ public class Player : NetworkBehaviour
                 // Lets go of the other Player
                 CmdLetGo(otherPlayer);
             }
+
+            // Turns the Player correctly
+
         }
-        // Turns the Player correctly
-        Flip();
-       
+
     }
 
     /// <summary>
@@ -182,7 +189,8 @@ public class Player : NetworkBehaviour
     /// </summary>
     [Command]
     public void CmdGrab()
-    {       
+    {
+        currentWeaponScript.DistanceRetract(dir);
         RpcRetract();
     }
 
@@ -207,6 +215,7 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdNotShooting()
     {
+        currentWeaponScript.DistanceRetract(dir);
         RpcNotShooting();
     }
 
@@ -228,6 +237,8 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdShoot()
     {
+        currentWeaponScript.DistanceGrab(dir);
+
         RpcExtend();
     }
 
@@ -316,10 +327,12 @@ public class Player : NetworkBehaviour
     [Client]
     private bool IsGrounded()
     {
-        RaycastHit2D groundCheckLeft = Physics2D.Raycast(new Vector3(transform.position.x - transform.localScale.x / 2, transform.position.y, transform.position.z), Vector2.down, transform.localScale.y/2 + 0.05f, layers);
-        RaycastHit2D groundCheckRight = Physics2D.Raycast(new Vector3(transform.position.x + transform.localScale.x / 2, transform.position.y, transform.position.z), Vector2.down, transform.localScale.y / 2 + 0.05f, layers);
+        RaycastHit2D groundCheckLeft = Physics2D.Raycast(new Vector3(transform.position.x - sprite.localScale.x / 2, transform.position.y, transform.position.z), 
+            Vector2.down, sprite.localScale.y/2 + 0.05f, layers);
+        RaycastHit2D groundCheckRight = Physics2D.Raycast(new Vector3(transform.position.x + sprite.localScale.x / 2, transform.position.y, transform.position.z), 
+            Vector2.down, sprite.localScale.y / 2 + 0.05f, layers);
 
-        Debug.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - transform.localScale.y/2 - 0.01f), Color.red);
+        Debug.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - sprite.localScale.y/2 - 0.01f), Color.red);
 
         if((groundCheckLeft.collider != null && groundCheckLeft.collider.CompareTag("Ground")) || 
             (groundCheckRight.collider != null && groundCheckRight.collider.CompareTag("Ground")))
@@ -361,7 +374,6 @@ public class Player : NetworkBehaviour
         _playerRB.simulated = false;
 
         float step = 0.5f;
-        Debug.Log(step);
         transform.position = Vector3.MoveTowards(transform.position, weaponPos, step);
 
         if (Vector3.Distance(otherMovePos.transform.position, transform.position) <= 0.1f)
@@ -387,8 +399,7 @@ public class Player : NetworkBehaviour
         {
             CmdPickupItem(col.GetComponent<NetworkIdentity>(), this.GetComponent<NetworkIdentity>());
         }
-
-        if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
+        else if (col.transform.GetComponent<WeaponScript>() && col.tag != "Weapon")
         {
             otherPlayer = col.transform.parent.gameObject.GetComponent<Player>();
             otherMovePos = otherPlayer.playerMovePos;
@@ -402,41 +413,41 @@ public class Player : NetworkBehaviour
         
     }
 
-    [Server]
-    public static string LocalIPAddress()
-    {
-        IPHostEntry host;
-        string localIP = "0.0.0.0";
-        host = Dns.GetHostEntry(Dns.GetHostName());
-        foreach (IPAddress ip in host.AddressList)
-        {
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
-                localIP = ip.ToString();
-                break;
-            }
-        }
-        return localIP;
-    }
+    //[Server]
+    //public static string LocalIPAddress()
+    //{
+    //    IPHostEntry host;
+    //    string localIP = "0.0.0.0";
+    //    host = Dns.GetHostEntry(Dns.GetHostName());
+    //    foreach (IPAddress ip in host.AddressList)
+    //    {
+    //        if (ip.AddressFamily == AddressFamily.InterNetwork)
+    //        {
+    //            localIP = ip.ToString();
+    //            break;
+    //        }
+    //    }
+    //    return localIP;
+    //}
 
-    [Server]
-    public string RandomCode()
-    {
-        const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        string code = "";
-        for (int i = 0; i < 4; i++)
-        {
-            code += letters.Substring(Random.Range(0, 25), 1);
-        }
-        return code;
+    //[Server]
+    //public string RandomCode()
+    //{
+    //    const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    //    string code = "";
+    //    for (int i = 0; i < 4; i++)
+    //    {
+    //        code += letters.Substring(Random.Range(0, 25), 1);
+    //    }
+    //    return code;
 
-    }
+    //}
 
     [Client]
     public void OnGUI()
     {
-        addresses.TryGetValue(LocalIPAddress(), out string val);
-        GUI.Label(new Rect(10, 10, 100, 20), "Local IP:" + val); 
+        //addresses.TryGetValue(LocalIPAddress(), out string val);
+        //GUI.Label(new Rect(10, 10, 150, 40), "Local IP:" + LocalIPAddress()); 
 
     }
 
@@ -446,6 +457,11 @@ public class Player : NetworkBehaviour
         item.AssignClientAuthority(playerID.connectionToClient);
         //currentWeapon = item.gameObject;
         //currentWeapon.transform.parent = gameObject.transform;
+        currentWeapon = item.gameObject;
+        currentWeapon.transform.parent = gameObject.transform;
+        currentWeapon.transform.localPosition = wepPos.localPosition;
+        currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
+        currentWeaponScript.startPos = currentWeapon.transform.localPosition;
         RpcPickupItem(item, playerID);
         item.RemoveClientAuthority();
     }
@@ -456,7 +472,9 @@ public class Player : NetworkBehaviour
         //item.AssignClientAuthority(playerID.connectionToClient);
         currentWeapon = item.gameObject;
         currentWeapon.transform.parent = gameObject.transform;
+        currentWeapon.transform.localPosition = wepPos.localPosition;
         currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
+        currentWeaponScript.startPos = currentWeapon.transform.localPosition;
     }
 
     /// <summary>
