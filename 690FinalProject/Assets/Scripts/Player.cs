@@ -15,20 +15,8 @@ public class Player : NetworkBehaviour
     private float _speedVertical = 20;
 
     private float horizontalInput;
-    //const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    //string[] letters = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z" };
-    private Dictionary<int, string> letters = new Dictionary<int, string>()
-    {
-            { 0, "A" }, { 1, "B" }, { 2, "C" }, { 3, "D" }, { 4, "E" },
-            { 5, "F" }, { 6, "G" }, { 7, "H" }, { 8, "I" }, { 9, "J" },
-            { 10, "K" }, { 11, "L" }, { 12, "M" }, { 13, "N" }, { 14, "O" },
-            { 15, "P" }, { 16, "Q" }, { 17, "R" }, { 18, "S" }, { 19, "T" },
-            { 20, "U" }, { 21, "V" }, { 22, "W" }, { 23, "X" }, { 24, "Y" },
-            { 25, "Z" }
 
-    };
-
-
+    
     private SyncDictionary<string, string> addresses = new SyncDictionary<string, string>();
 
     [SerializeField]
@@ -91,7 +79,6 @@ public class Player : NetworkBehaviour
 
     void Start()
     {
-
         dir = 1;
         _playerRB = GetComponent<Rigidbody2D>();
         //currentWeaponScript = currentWeapon.GetComponent<WeaponScript>();
@@ -429,7 +416,56 @@ public class Player : NetworkBehaviour
             }
         }
         return localIP;
-    }    
+    }
+
+    [Server]
+    public string Encode()
+    {
+        const string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        string ip = LocalIPAddress();
+        string code = "";
+        string[] parts;
+
+        parts = ip.Split('.');
+
+        foreach(string str in parts)
+        {
+            if(str.Length > 2)
+            {
+                int x = int.Parse(str.Substring(0, 2));
+                code += letters.Substring(x, 1);
+                code += letters.Substring(int.Parse(str.Substring(2, 1)), 1);
+            }
+            else if(int.Parse(str) > 25)
+            {
+                code += letters.Substring(int.Parse(str.Substring(0, 1)), 1);
+                code += letters.Substring(int.Parse(str.Substring(1, 1)), 1);
+
+            }
+            else
+            {
+                code += letters.Substring(int.Parse(str), 1);
+
+            }
+
+
+
+        }
+
+        Debug.Log(code);
+        return code;
+
+    }
+
+    [Client]
+    public void Decode(string code)
+    {
+        string[] parts;
+        parts = code.Split();
+
+
+
+    }
 
     [Client]
     public void OnGUI()
