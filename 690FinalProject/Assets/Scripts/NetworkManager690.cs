@@ -27,7 +27,7 @@ namespace Mirror
             NetworkServer.AddPlayerForConnection(conn, player);
             players.Add(conn.connectionId);
 
-            if(numPlayers == 1)
+            if(numPlayers == 2)
             {
                 weapon1 = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Weapon"), weaponLeftSpawn.position, Quaternion.identity);
                 NetworkServer.Spawn(weapon1);

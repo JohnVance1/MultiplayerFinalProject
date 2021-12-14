@@ -413,22 +413,22 @@ public class Player : NetworkBehaviour
         
     }
 
-    //[Server]
-    //public static string LocalIPAddress()
-    //{
-    //    IPHostEntry host;
-    //    string localIP = "0.0.0.0";
-    //    host = Dns.GetHostEntry(Dns.GetHostName());
-    //    foreach (IPAddress ip in host.AddressList)
-    //    {
-    //        if (ip.AddressFamily == AddressFamily.InterNetwork)
-    //        {
-    //            localIP = ip.ToString();
-    //            break;
-    //        }
-    //    }
-    //    return localIP;
-    //}
+    [Client]
+    public static string LocalIPAddress()
+    {
+        IPHostEntry host;
+        string localIP = "0.0.0.0";
+        host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (IPAddress ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                localIP = ip.ToString();
+                break;
+            }
+        }
+        return localIP;
+    }
 
     //[Server]
     //public string RandomCode()
@@ -447,7 +447,7 @@ public class Player : NetworkBehaviour
     public void OnGUI()
     {
         //addresses.TryGetValue(LocalIPAddress(), out string val);
-        //GUI.Label(new Rect(10, 10, 150, 40), "Local IP:" + LocalIPAddress()); 
+        GUI.Label(new Rect(10, 10, 150, 40), "Local IP:" + LocalIPAddress()); 
 
     }
 
